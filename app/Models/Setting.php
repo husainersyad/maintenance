@@ -23,8 +23,6 @@ class Setting extends Model
     public const DEFAULTS = [
         'certificate_expiring_soon_days' => '60',
         'training_reminder_days_before' => '7',
-        // Empty = fall back to this site's own address (url('/')).
-        'qr_base_url' => '',
     ];
 
     public static function get(string $key, mixed $default = null): mixed
