@@ -58,10 +58,18 @@ class DashboardController extends Controller
         $trainingCompletion = $this->trainingCompletionSummary($employeeIds, $year);
         $overtimeHoursThisYear = $this->overtimeHours($employeeIds, $year);
 
-        $latestNews = News::query()->published()->orderByDesc('created_at')->take(6)->get();
+        $latestNews = News::query()->published()->visibleTo($request->user())->orderByDesc('created_at')->take(6)->get();
+
+        $pendingAcknowledgements = News::query()
+            ->published()
+            ->where('requires_acknowledgement', true)
+            ->whereHas('acknowledgements', fn ($q) => $q->where('user_id', $request->user()->id)->whereNull('acknowledged_at'))
+            ->orderByDesc('created_at')
+            ->get(['id', 'title']);
 
         return view('dashboard', [
             'latestNews' => $latestNews,
+            'pendingAcknowledgements' => $pendingAcknowledgements,
             'filters' => [
                 'year' => $year,
                 'business_unit_id' => $businessUnitId,

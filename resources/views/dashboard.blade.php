@@ -77,6 +77,17 @@ $maxSkillGap = collect($topSkillGaps)->max('count') ?: 1;
             </form>
         </div>
 
+        @if ($pendingAcknowledgements->isNotEmpty())
+            <div class="rounded-lg border border-warning-300 bg-warning-50 p-4 shadow-md">
+                <p class="text-sm font-semibold text-warning-800">You have {{ $pendingAcknowledgements->count() }} announcement(s) waiting for your confirmation</p>
+                <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">
+                    @foreach ($pendingAcknowledgements as $pending)
+                        <li><a href="{{ route('news.show', $pending) }}" class="font-medium text-warning-800 underline hover:text-warning-900">{{ $pending->title }}</a></li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         @if ($latestNews->isNotEmpty())
             <div
                 x-data="{ active: 0, count: {{ $latestNews->count() }} }"
