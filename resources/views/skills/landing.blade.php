@@ -2,18 +2,6 @@
     <x-slot name="header">Skills &amp; Competencies</x-slot>
 
     <div class="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
-        @if (auth()->user()->hasPermissionTo(\App\Enums\PermissionName::ManageSkills->value))
-            <a href="{{ route('skills.catalog.index') }}" class="rounded-md border border-l-4 border-neutral-200 border-l-brand-500 bg-white px-3 py-2 transition hover:border-brand-400 hover:border-l-brand-500 hover:bg-brand-50/40">
-                <p class="text-sm font-medium text-neutral-800">Skill Database &amp; Excel Import</p>
-                <p class="text-xs text-neutral-500">{{ \App\Models\Skill::count() }} skill(s). Import the master skill list from Excel.</p>
-            </a>
-
-            <a href="{{ route('skills.position-defaults.index') }}" class="rounded-md border border-l-4 border-neutral-200 border-l-brand-500 bg-white px-3 py-2 transition hover:border-brand-400 hover:border-l-brand-500 hover:bg-brand-50/40">
-                <p class="text-sm font-medium text-neutral-800">Default Skills per Position</p>
-                <p class="text-xs text-neutral-500">Tick which skills apply by default to each position.</p>
-            </a>
-        @endif
-
         @can(\App\Enums\PermissionName::ManageSkills->value)
             <a href="{{ route('skills.positions.index') }}" class="rounded-md border border-l-4 border-neutral-200 border-l-brand-500 bg-white px-3 py-2 transition hover:border-brand-400 hover:border-l-brand-500 hover:bg-brand-50/40">
                 <p class="text-sm font-medium text-neutral-800">Position Skill Requirements</p>

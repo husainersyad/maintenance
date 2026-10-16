@@ -10,7 +10,6 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeDevelopmentPlanController;
 use App\Http\Controllers\EmployeeOnboardingController;
 use App\Http\Controllers\EmployeeSkillAssessmentController;
-use App\Http\Controllers\EmployeeSkillChecklistController;
 use App\Http\Controllers\GuestSessionController;
 use App\Http\Controllers\JobDescriptionController;
 use App\Http\Controllers\LototoController;
@@ -20,23 +19,15 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrganizationChartController;
 use App\Http\Controllers\OvertimeController;
-use App\Http\Controllers\PositionDefaultSkillController;
 use App\Http\Controllers\PositionSkillRequirementController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicCertificateController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
-use App\Http\Controllers\ShiftCommController;
 use App\Http\Controllers\SignatoryController;
-use App\Http\Controllers\SkillCatalogController;
 use App\Http\Controllers\SkillMatrixController;
-use App\Http\Controllers\TaskController;
-use App\Http\Controllers\TaskPlanController;
-use App\Http\Controllers\TrainingCheckInController;
 use App\Http\Controllers\TrainingProgramController;
-use App\Http\Controllers\TrainingQuestionController;
-use App\Http\Controllers\TrainingQuizController;
 use App\Http\Controllers\TrainingRecordController;
 use App\Http\Controllers\TrainingSessionController;
 use App\Http\Controllers\UserManagementController;
@@ -91,8 +82,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/employees-import', [EmployeeController::class, 'import'])->middleware('menu.edit:'.MenuKey::Employees->value)->name('employees.import');
     Route::post('/employees/{employee}/onboarding-link', [EmployeeController::class, 'regenerateOnboardingLink'])->middleware('menu.edit:'.MenuKey::Employees->value)->name('employees.onboarding-link');
     Route::post('/employees/{employee}/skill-assessments', [EmployeeSkillAssessmentController::class, 'store'])->middleware('menu.edit:'.MenuKey::SkillsCompetencies->value)->name('employees.skill-assessments.store');
-    Route::get('/employees/{employee}/skill-checklist', [EmployeeSkillChecklistController::class, 'edit'])->name('employees.skill-checklist.edit');
-    Route::put('/employees/{employee}/skill-checklist', [EmployeeSkillChecklistController::class, 'update'])->middleware('menu.edit:'.MenuKey::SkillsCompetencies->value)->name('employees.skill-checklist.update');
     Route::delete('/employees/{employee}/skill-assessments/{assessment}', [EmployeeSkillAssessmentController::class, 'destroy'])->middleware('menu.edit:'.MenuKey::SkillsCompetencies->value)->name('employees.skill-assessments.destroy');
 
     Route::post('/employees/{employee}/training-records', [TrainingRecordController::class, 'store'])->middleware('menu.edit:'.MenuKey::Training->value)->name('employees.training-records.store');
@@ -137,28 +126,6 @@ Route::middleware(['auth', 'verified'])->prefix('skills')->name('skills.')->grou
         return view('skills.landing');
     })->name('landing');
 
-    // The master skill list and its position defaults are set by whoever holds
-    // ManageSkills through their role (manager/admin). `can:` would also let
-    // supervisors in, because their menu-edit override grants skills.manage.
-    Route::group(['middleware' => [function ($request, $next) {
-        abort_unless($request->user()->hasPermissionTo(PermissionName::ManageSkills->value), 403);
-
-        return $next($request);
-    }]], function () {
-        Route::prefix('catalog')->name('catalog.')->group(function () {
-            Route::get('/', [SkillCatalogController::class, 'index'])->name('index');
-            Route::get('/template', [SkillCatalogController::class, 'template'])->name('template');
-            Route::get('/export', [SkillCatalogController::class, 'export'])->name('export');
-            Route::post('/import', [SkillCatalogController::class, 'import'])->middleware('menu.edit:'.MenuKey::SkillsCompetencies->value)->name('import');
-        });
-
-        Route::prefix('position-defaults')->name('position-defaults.')->group(function () {
-            Route::get('/', [PositionDefaultSkillController::class, 'index'])->name('index');
-            Route::get('/{position}/edit', [PositionDefaultSkillController::class, 'edit'])->name('edit');
-            Route::put('/{position}', [PositionDefaultSkillController::class, 'update'])->middleware('menu.edit:'.MenuKey::SkillsCompetencies->value)->name('update');
-        });
-    });
-
     Route::middleware('can:'.PermissionName::ManageSkills->value)->prefix('positions')->name('positions.')->group(function () {
         Route::get('/', [PositionSkillRequirementController::class, 'index'])->name('index');
         Route::get('/export', [PositionSkillRequirementController::class, 'export'])->name('export');
@@ -199,8 +166,8 @@ Route::middleware(['auth', 'verified', 'can:'.PermissionName::ViewTraining->valu
     ->group(function () {
         Route::get('/calendar', [TrainingSessionController::class, 'calendar'])->name('calendar');
         Route::get('/records', [TrainingRecordController::class, 'index'])->name('records.index');
-        Route::get('/quiz/{participant}', [TrainingQuizController::class, 'show'])->name('quiz.show');
-        Route::post('/quiz/{participant}', [TrainingQuizController::class, 'submit'])->name('quiz.submit');
+        Route::get('/quiz/{participant}', [\App\Http\Controllers\TrainingQuizController::class, 'show'])->name('quiz.show');
+        Route::post('/quiz/{participant}', [\App\Http\Controllers\TrainingQuizController::class, 'submit'])->name('quiz.submit');
         Route::post('/records-import', [TrainingRecordController::class, 'import'])->middleware('menu.edit:'.MenuKey::Training->value)->name('records.import');
 
         // Training Management: program/session administration, including the
@@ -208,11 +175,11 @@ Route::middleware(['auth', 'verified', 'can:'.PermissionName::ViewTraining->valu
         // is restricted to ManageTraining holders only — not every ViewTraining
         // role (e.g. regular staff taking their own quiz) should browse this.
         Route::middleware('can:'.PermissionName::ManageTraining->value)->group(function () {
-            Route::get('/programs/{program}/questions', [TrainingQuestionController::class, 'index'])->name('programs.questions.index');
-            Route::get('/programs/{program}/questions/export', [TrainingQuestionController::class, 'export'])->name('programs.questions.export');
-            Route::post('/programs/{program}/questions/import', [TrainingQuestionController::class, 'import'])->middleware('menu.edit:'.MenuKey::Training->value)->name('programs.questions.import');
-            Route::post('/programs/{program}/questions', [TrainingQuestionController::class, 'store'])->middleware('menu.edit:'.MenuKey::Training->value)->name('programs.questions.store');
-            Route::delete('/programs/{program}/questions/{question}', [TrainingQuestionController::class, 'destroy'])->middleware('menu.edit:'.MenuKey::Training->value)->name('programs.questions.destroy');
+            Route::get('/programs/{program}/questions', [\App\Http\Controllers\TrainingQuestionController::class, 'index'])->name('programs.questions.index');
+            Route::get('/programs/{program}/questions/export', [\App\Http\Controllers\TrainingQuestionController::class, 'export'])->name('programs.questions.export');
+            Route::post('/programs/{program}/questions/import', [\App\Http\Controllers\TrainingQuestionController::class, 'import'])->middleware('menu.edit:'.MenuKey::Training->value)->name('programs.questions.import');
+            Route::post('/programs/{program}/questions', [\App\Http\Controllers\TrainingQuestionController::class, 'store'])->middleware('menu.edit:'.MenuKey::Training->value)->name('programs.questions.store');
+            Route::delete('/programs/{program}/questions/{question}', [\App\Http\Controllers\TrainingQuestionController::class, 'destroy'])->middleware('menu.edit:'.MenuKey::Training->value)->name('programs.questions.destroy');
 
             Route::resource('programs', TrainingProgramController::class)->except(['destroy'])->parameters(['programs' => 'program'])
                 ->middlewareFor(['create', 'store', 'edit', 'update'], 'menu.edit:'.MenuKey::Training->value);
@@ -222,8 +189,8 @@ Route::middleware(['auth', 'verified', 'can:'.PermissionName::ViewTraining->valu
             Route::post('/programs/{program}/sessions', [TrainingSessionController::class, 'store'])->middleware('menu.edit:'.MenuKey::Training->value)->name('programs.sessions.store');
 
             Route::get('/sessions/{trainingSession}', [TrainingSessionController::class, 'show'])->name('sessions.show');
-            Route::get('/sessions/{trainingSession}/check-in', [TrainingCheckInController::class, 'show'])->name('sessions.check-in');
-            Route::post('/sessions/{trainingSession}/check-in', [TrainingCheckInController::class, 'attempt'])->name('sessions.check-in.attempt');
+            Route::get('/sessions/{trainingSession}/check-in', [\App\Http\Controllers\TrainingCheckInController::class, 'show'])->name('sessions.check-in');
+            Route::post('/sessions/{trainingSession}/check-in', [\App\Http\Controllers\TrainingCheckInController::class, 'attempt'])->name('sessions.check-in.attempt');
             Route::get('/sessions/{trainingSession}/edit', [TrainingSessionController::class, 'edit'])->middleware('menu.edit:'.MenuKey::Training->value)->name('sessions.edit');
             Route::put('/sessions/{trainingSession}', [TrainingSessionController::class, 'update'])->middleware('menu.edit:'.MenuKey::Training->value)->name('sessions.update');
             Route::delete('/sessions/{trainingSession}', [TrainingSessionController::class, 'destroy'])->middleware('menu.edit:'.MenuKey::Training->value)->name('sessions.destroy');
@@ -239,35 +206,35 @@ Route::middleware(['auth', 'verified', 'can:'.PermissionName::ViewTraining->valu
 // Task Planner: open to every signed-in employee - access is decided per
 // plan by TaskPlanPolicy (owner, assignee, or Administrator), not a role.
 Route::middleware(['auth', 'verified'])->prefix('tasks')->name('tasks.')->group(function () {
-    Route::get('/', [TaskPlanController::class, 'index'])->name('index');
-    Route::post('/plans', [TaskPlanController::class, 'store'])->name('plans.store');
-    Route::get('/plans/{plan}', [TaskPlanController::class, 'show'])->name('plans.show');
-    Route::put('/plans/{plan}', [TaskPlanController::class, 'update'])->name('plans.update');
-    Route::delete('/plans/{plan}', [TaskPlanController::class, 'destroy'])->name('plans.destroy');
-    Route::post('/plans/{plan}/buckets', [TaskPlanController::class, 'storeBucket'])->name('plans.buckets.store');
-    Route::put('/plans/{plan}/buckets/{bucket}', [TaskPlanController::class, 'updateBucket'])->name('plans.buckets.update');
-    Route::delete('/plans/{plan}/buckets/{bucket}', [TaskPlanController::class, 'destroyBucket'])->name('plans.buckets.destroy');
-    Route::post('/plans/{plan}/tasks', [TaskController::class, 'store'])->name('store');
-    Route::get('/{task}', [TaskController::class, 'show'])->name('show');
-    Route::put('/{task}', [TaskController::class, 'update'])->name('update');
-    Route::delete('/{task}', [TaskController::class, 'destroy'])->name('destroy');
-    Route::post('/{task}/toggle-complete', [TaskController::class, 'toggleComplete'])->name('toggle-complete');
-    Route::post('/{task}/move', [TaskController::class, 'move'])->name('move');
-    Route::post('/{task}/checklist', [TaskController::class, 'storeChecklistItem'])->name('checklist.store');
-    Route::post('/{task}/checklist/{item}/toggle', [TaskController::class, 'toggleChecklistItem'])->name('checklist.toggle');
-    Route::delete('/{task}/checklist/{item}', [TaskController::class, 'destroyChecklistItem'])->name('checklist.destroy');
+    Route::get('/', [\App\Http\Controllers\TaskPlanController::class, 'index'])->name('index');
+    Route::post('/plans', [\App\Http\Controllers\TaskPlanController::class, 'store'])->name('plans.store');
+    Route::get('/plans/{plan}', [\App\Http\Controllers\TaskPlanController::class, 'show'])->name('plans.show');
+    Route::put('/plans/{plan}', [\App\Http\Controllers\TaskPlanController::class, 'update'])->name('plans.update');
+    Route::delete('/plans/{plan}', [\App\Http\Controllers\TaskPlanController::class, 'destroy'])->name('plans.destroy');
+    Route::post('/plans/{plan}/buckets', [\App\Http\Controllers\TaskPlanController::class, 'storeBucket'])->name('plans.buckets.store');
+    Route::put('/plans/{plan}/buckets/{bucket}', [\App\Http\Controllers\TaskPlanController::class, 'updateBucket'])->name('plans.buckets.update');
+    Route::delete('/plans/{plan}/buckets/{bucket}', [\App\Http\Controllers\TaskPlanController::class, 'destroyBucket'])->name('plans.buckets.destroy');
+    Route::post('/plans/{plan}/tasks', [\App\Http\Controllers\TaskController::class, 'store'])->name('store');
+    Route::get('/{task}', [\App\Http\Controllers\TaskController::class, 'show'])->name('show');
+    Route::put('/{task}', [\App\Http\Controllers\TaskController::class, 'update'])->name('update');
+    Route::delete('/{task}', [\App\Http\Controllers\TaskController::class, 'destroy'])->name('destroy');
+    Route::post('/{task}/toggle-complete', [\App\Http\Controllers\TaskController::class, 'toggleComplete'])->name('toggle-complete');
+    Route::post('/{task}/move', [\App\Http\Controllers\TaskController::class, 'move'])->name('move');
+    Route::post('/{task}/checklist', [\App\Http\Controllers\TaskController::class, 'storeChecklistItem'])->name('checklist.store');
+    Route::post('/{task}/checklist/{item}/toggle', [\App\Http\Controllers\TaskController::class, 'toggleChecklistItem'])->name('checklist.toggle');
+    Route::delete('/{task}/checklist/{item}', [\App\Http\Controllers\TaskController::class, 'destroyChecklistItem'])->name('checklist.destroy');
 });
 
 // Shift Comm: technicians' machine activity log shared across shifts. Open to
 // every signed-in non-guest user; edit/delete limited by ShiftCommPolicy.
 Route::middleware(['auth', 'verified'])->prefix('shift-comm')->name('shift-comm.')->group(function () {
-    Route::get('/', [ShiftCommController::class, 'index'])->name('index');
-    Route::get('/create', [ShiftCommController::class, 'create'])->name('create');
-    Route::post('/', [ShiftCommController::class, 'store'])->name('store');
-    Route::get('/{shiftComm}', [ShiftCommController::class, 'show'])->name('show');
-    Route::get('/{shiftComm}/edit', [ShiftCommController::class, 'edit'])->name('edit');
-    Route::put('/{shiftComm}', [ShiftCommController::class, 'update'])->name('update');
-    Route::delete('/{shiftComm}', [ShiftCommController::class, 'destroy'])->name('destroy');
+    Route::get('/', [\App\Http\Controllers\ShiftCommController::class, 'index'])->name('index');
+    Route::get('/create', [\App\Http\Controllers\ShiftCommController::class, 'create'])->name('create');
+    Route::post('/', [\App\Http\Controllers\ShiftCommController::class, 'store'])->name('store');
+    Route::get('/{shiftComm}', [\App\Http\Controllers\ShiftCommController::class, 'show'])->name('show');
+    Route::get('/{shiftComm}/edit', [\App\Http\Controllers\ShiftCommController::class, 'edit'])->name('edit');
+    Route::put('/{shiftComm}', [\App\Http\Controllers\ShiftCommController::class, 'update'])->name('update');
+    Route::delete('/{shiftComm}', [\App\Http\Controllers\ShiftCommController::class, 'destroy'])->name('destroy');
 });
 
 Route::middleware(['auth', 'verified', 'can:'.PermissionName::ViewDevelopmentPlans->value])

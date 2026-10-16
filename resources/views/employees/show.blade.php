@@ -231,17 +231,6 @@
 
         <div x-show="tab === 'skills'">
             <div class="space-y-6">
-                @php $checklistCount = count($employee->checklistSkillIds()); @endphp
-                <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-neutral-200 bg-white px-4 py-3 shadow-md">
-                    <div>
-                        <p class="text-sm font-semibold text-neutral-900">Skill Checklist</p>
-                        <p class="text-xs text-neutral-500">{{ $checklistCount }} skill(s) apply to this employee{{ $employee->position ? ' (default from '.$employee->position->title.', adjusted by supervisor)' : '' }}.</p>
-                    </div>
-                    @can(\App\Enums\PermissionName::AssessCompetencies->value)
-                        <a href="{{ route('employees.skill-checklist.edit', $employee) }}" class="rounded-md border border-neutral-300 bg-white px-3.5 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50">Review checklist</a>
-                    @endcan
-                </div>
-
                 <div class="overflow-x-auto rounded-lg border border-neutral-200 bg-white shadow-md">
                     <table class="min-w-full divide-y divide-neutral-200 text-sm">
                         <thead class="border-b-2 border-brand-500 bg-brand-50">
