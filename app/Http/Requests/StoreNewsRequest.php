@@ -16,15 +16,7 @@ class StoreNewsRequest extends FormRequest
 
     public function rules(): array
     {
-        // The news type is fixed at creation: switching an item that already
-        // has confirmations back to read-only would erase that record.
-        $existing = $this->route('news');
-        $needsAck = $existing ? $existing->requires_acknowledgement : $this->boolean('requires_acknowledgement');
-
         return [
-            'requires_acknowledgement' => ['nullable', 'boolean'],
-            'recipient_ids' => [Rule::requiredIf($needsAck), 'nullable', 'array', $needsAck ? 'min:1' : 'max:0'],
-            'recipient_ids.*' => ['integer', Rule::exists('users', 'id')],
             'title' => ['required', 'string', 'max:255'],
             'body' => ['required', 'string', 'max:20000'],
             'template' => ['required', Rule::in(News::TEMPLATES)],

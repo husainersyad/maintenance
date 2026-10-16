@@ -25,48 +25,6 @@ $old = fn ($field, $default = null) => old($field, $news?->$field ?? $default);
                     <x-input-error :messages="$errors->get('body')" class="mt-1" />
                 </div>
 
-                <div x-data="{ needsAck: {{ \Illuminate\Support\Js::from((bool) old('requires_acknowledgement', $news?->requires_acknowledgement ?? false)) }}, search: '' }" class="space-y-3 rounded-md border border-neutral-200 p-4">
-                    <x-input-label value="News Type" />
-                    @if ($isEdit)
-                        <p class="text-sm text-neutral-700">
-                            {{ $news->requires_acknowledgement ? 'Requires acknowledgement' : 'Read only' }}
-                            <span class="text-xs text-neutral-400">(cannot be changed after creation)</span>
-                        </p>
-                    @else
-                        <label class="flex items-start gap-2 text-sm text-neutral-700">
-                            <input type="radio" name="requires_acknowledgement" value="0" @click="needsAck = false" :checked="!needsAck" class="mt-0.5">
-                            <span><span class="font-medium">Read only</span> - shown to everyone, nothing to confirm.</span>
-                        </label>
-                        <label class="flex items-start gap-2 text-sm text-neutral-700">
-                            <input type="radio" name="requires_acknowledgement" value="1" @click="needsAck = true" :checked="needsAck" class="mt-0.5">
-                            <span><span class="font-medium">Requires acknowledgement</span> - shown only to the people you choose, who must confirm they have read and understood it. The confirmation time is recorded.</span>
-                        </label>
-                    @endif
-                    <x-input-error :messages="$errors->get('recipient_ids')" class="mt-1" />
-
-                    @if (! $isEdit || $news->requires_acknowledgement)
-                        <div x-show="needsAck" x-cloak class="space-y-2">
-                            <x-input-label value="Recipients" />
-                            <input type="text" x-model="search" placeholder="Search name or email..." class="block w-full rounded-md border-neutral-300 text-sm">
-                            <div class="max-h-56 space-y-1 overflow-auto rounded-md border border-neutral-200 p-2">
-                                @foreach ($candidates as $candidate)
-                                    @php $locked = in_array($candidate->id, $acknowledgedUserIds ?? []); @endphp
-                                    <label class="flex items-center gap-2 text-sm text-neutral-700" x-show="'{{ strtolower(addslashes($candidate->name.' '.$candidate->email)) }}'.includes(search.toLowerCase())">
-                                        <input type="checkbox" name="recipient_ids[]" value="{{ $candidate->id }}" class="rounded border-neutral-300"
-                                               @checked($locked || in_array($candidate->id, old('recipient_ids', $selectedRecipientIds)))
-                                               @if ($locked) onclick="return false" @endif>
-                                        <span>{{ $candidate->name }} <span class="text-xs text-neutral-400">{{ $candidate->email }}</span></span>
-                                        @if ($locked)
-                                            <span class="text-xs text-success-700">confirmed</span>
-                                        @endif
-                                    </label>
-                                @endforeach
-                            </div>
-                            <p class="text-xs text-neutral-400">Recipients who already confirmed cannot be removed, so the record stays intact.</p>
-                        </div>
-                    @endif
-                </div>
-
                 <div>
                     <x-input-label for="template" value="Template" />
                     <select id="template" name="template" class="mt-1 block w-full rounded-md border-neutral-300 text-sm">

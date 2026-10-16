@@ -335,10 +335,6 @@ Route::middleware(['auth', 'verified'])
     ->get('/news/{news}', [NewsController::class, 'show'])
     ->name('news.show');
 
-Route::middleware(['auth', 'verified'])
-    ->post('/news/{news}/acknowledge', [NewsController::class, 'acknowledge'])
-    ->name('news.acknowledge');
-
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
