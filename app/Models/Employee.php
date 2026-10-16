@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Concerns\Auditable;
 use App\Enums\PermissionName;
 use App\Enums\RoleName;
+use Database\Factories\EmployeeFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 #[Fillable([
@@ -24,8 +26,8 @@ use Illuminate\Support\Str;
 ])]
 class Employee extends Model
 {
-    /** @use HasFactory<\Database\Factories\EmployeeFactory> */
-    use HasFactory, SoftDeletes, Auditable;
+    /** @use HasFactory<EmployeeFactory> */
+    use Auditable, HasFactory, SoftDeletes;
 
     /**
      * Workforce classification: BC (Blue Collar - operator/technician level),
@@ -113,6 +115,28 @@ class Employee extends Model
     public function position(): BelongsTo
     {
         return $this->belongsTo(Position::class);
+    }
+
+    public function skillOverrides(): HasMany
+    {
+        return $this->hasMany(EmployeeSkillOverride::class);
+    }
+
+    /**
+     * Ids of the skills on this employee's checklist: the position default,
+     * plus skills a supervisor added, minus skills they removed.
+     *
+     * @return array<int, int>
+     */
+    public function checklistSkillIds(): array
+    {
+        $defaults = $this->position ? $this->position->skills()->pluck('skills.id') : collect();
+        $overrides = $this->skillOverrides()->pluck('action', 'skill_id');
+
+        return $defaults
+            ->merge($overrides->filter(fn ($action) => $action === 'add')->keys())
+            ->diff($overrides->filter(fn ($action) => $action === 'remove')->keys())
+            ->unique()->values()->all();
     }
 
     public function skillPosition(): BelongsTo
@@ -246,7 +270,7 @@ class Employee extends Model
      * assessments are simply absent from the collection - never treated as
      * an implicit competency level.
      */
-    public function currentSkillAssessments(): \Illuminate\Support\Collection
+    public function currentSkillAssessments(): Collection
     {
         return $this->skillAssessments()
             ->with(['skill', 'competencyLevel'])
@@ -266,7 +290,7 @@ class Employee extends Model
      *
      * Status is one of: 'meets', 'exceeds', 'gap', 'incomplete'.
      */
-    public function skillGapRows(): \Illuminate\Support\Collection
+    public function skillGapRows(): Collection
     {
         // Uses the relation as already loaded when eager-loaded by the
         // caller (important when computing this across many employees at
