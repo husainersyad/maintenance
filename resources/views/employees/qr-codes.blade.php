@@ -19,19 +19,29 @@
                 @endif
             </form>
 
-            <div id="qr-base-url-panel" data-default-base-url="{{ url('/') }}" class="rounded-lg border border-neutral-200 bg-white p-4 shadow-md print:hidden">
+            <div id="qr-base-url-panel" data-base-url="{{ $qrBaseUrl }}" class="rounded-lg border border-neutral-200 bg-white p-4 shadow-md print:hidden">
+                @if (session('status'))
+                    <div class="mb-3 rounded-md bg-success-50 px-4 py-3 text-sm text-success-800">{{ session('status') }}</div>
+                @endif
+
                 <label for="qr-base-url" class="block text-sm font-medium text-neutral-700">Base URL used in the QR codes</label>
-                <p class="mt-1 text-xs text-neutral-500">
-                    Defaults to this site's current address. Type a different domain here (e.g. the production domain
-                    this will eventually run on) if you want the QR codes to point there instead - saved in this browser
-                    only, nothing on the server changes.
-                </p>
-                <div class="mt-2 flex flex-col gap-2 sm:flex-row">
-                    <input type="text" id="qr-base-url" placeholder="https://your-domain.example.com"
-                           class="w-full min-w-0 flex-1 rounded-md border-neutral-300 text-sm">
-                    <button type="button" id="qr-base-url-apply" class="shrink-0 rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Apply</button>
-                    <button type="button" id="qr-base-url-reset" class="shrink-0 rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">Reset to default</button>
-                </div>
+                @if ($canEditQrBaseUrl)
+                    <p class="mt-1 text-xs text-neutral-500">
+                        Site-wide setting, only the Administrator can change it. Leave empty to use this site's current address ({{ url('/') }}).
+                    </p>
+                    <form method="POST" action="{{ route('employees.qr-codes.base-url') }}" class="mt-2 flex flex-col gap-2 sm:flex-row">
+                        @csrf
+                        @method('PUT')
+                        <input type="text" id="qr-base-url" name="qr_base_url" value="{{ old('qr_base_url', \App\Models\Setting::get('qr_base_url')) }}" placeholder="https://your-domain.example.com"
+                               class="w-full min-w-0 flex-1 rounded-md border-neutral-300 text-sm">
+                        <button type="submit" class="shrink-0 rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Save</button>
+                    </form>
+                    <x-input-error :messages="$errors->get('qr_base_url')" class="mt-1" />
+                @else
+                    <p class="mt-1 text-xs text-neutral-500">Only the Administrator can change this.</p>
+                    <input type="text" id="qr-base-url" value="{{ $qrBaseUrl }}" readonly disabled
+                           class="mt-2 w-full rounded-md border-neutral-300 bg-neutral-100 text-sm text-neutral-500">
+                @endif
             </div>
         </div>
 

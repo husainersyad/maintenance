@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Concerns\ExportsSpreadsheet;
 use App\Enums\PermissionName;
+use App\Enums\RoleName;
 use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
 use App\Models\BusinessUnit;
@@ -16,6 +17,7 @@ use App\Models\EmploymentType;
 use App\Models\MaintenanceTeam;
 use App\Models\Position;
 use App\Models\Shift;
+use App\Models\Setting;
 use App\Models\Skill;
 use App\Models\SkillPosition;
 use Illuminate\Http\RedirectResponse;
@@ -146,7 +148,27 @@ class EmployeeController extends Controller
         return view('employees.qr-codes', [
             'employees' => $employees,
             'filters' => $filters,
+            'qrBaseUrl' => rtrim((string) (Setting::get('qr_base_url') ?: url('/')), '/'),
+            'canEditQrBaseUrl' => $request->user()->hasRole(RoleName::Administrator->value),
         ]);
+    }
+
+    /**
+     * Only the Administrator (superadmin) may change the base URL embedded in
+     * every QR code - it's a site-wide value, so it's checked here as well
+     * as hidden in the view.
+     */
+    public function updateQrBaseUrl(Request $request): RedirectResponse
+    {
+        abort_unless($request->user()->hasRole(RoleName::Administrator->value), 403);
+
+        $data = $request->validate([
+            'qr_base_url' => ['nullable', 'url:http,https', 'max:255'],
+        ]);
+
+        Setting::set('qr_base_url', rtrim((string) ($data['qr_base_url'] ?? ''), '/'));
+
+        return back()->with('status', 'QR base URL updated.');
     }
 
     public function create(): View

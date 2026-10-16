@@ -1,13 +1,13 @@
 {
-  "_es6-1nSV5nqH.js": {
-    "file": "assets/es6-1nSV5nqH.js",
+  "_es6-wdDVWFcZ.js": {
+    "file": "assets/es6-wdDVWFcZ.js",
     "name": "es6",
     "imports": [
       "resources/js/app.js"
     ]
   },
   "resources/css/app.css": {
-    "file": "assets/app-BEvbf7Xm.css",
+    "file": "assets/app-DZQjruWT.css",
     "name": "app",
     "names": [
       "app.css"
@@ -16,7 +16,7 @@
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-BI1u58rQ.js",
+    "file": "assets/app-BS9sYGHt.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -28,12 +28,12 @@
     ]
   },
   "resources/js/face-login.js": {
-    "file": "assets/face-login-CanufOn0.js",
+    "file": "assets/face-login-B6T_tIeG.js",
     "name": "face-login",
     "src": "resources/js/face-login.js",
     "isDynamicEntry": true,
     "imports": [
-      "_es6-1nSV5nqH.js"
+      "_es6-wdDVWFcZ.js"
     ]
   },
   "resources/js/news-editor.js": {
@@ -52,12 +52,12 @@
     "isDynamicEntry": true
   },
   "resources/js/training-checkin.js": {
-    "file": "assets/training-checkin-BLxt7wnp.js",
+    "file": "assets/training-checkin-CDfPdF3p.js",
     "name": "training-checkin",
     "src": "resources/js/training-checkin.js",
     "isDynamicEntry": true,
     "imports": [
-      "_es6-1nSV5nqH.js"
+      "_es6-wdDVWFcZ.js"
     ]
   }
 }
