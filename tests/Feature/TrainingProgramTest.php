@@ -28,12 +28,12 @@ class TrainingProgramTest extends TestCase
         $response->assertRedirect('/guest-login');
     }
 
-    public function test_maintenance_staff_can_view_but_not_create_programs(): void
+    public function test_maintenance_staff_cannot_open_or_create_programs(): void
     {
         $staff = User::factory()->create();
         $staff->assignRole(RoleName::MaintenanceStaff->value);
 
-        $this->actingAs($staff)->get(route('training.programs.index'))->assertOk();
+        $this->actingAs($staff)->get(route('training.programs.index'))->assertForbidden();
         $this->actingAs($staff)->get(route('training.programs.create'))->assertForbidden();
     }
 
@@ -55,12 +55,12 @@ class TrainingProgramTest extends TestCase
         $this->assertTrue($program->skills->contains($skill));
     }
 
-    public function test_supervisor_can_view_but_not_manage_training_programs(): void
+    public function test_supervisor_cannot_manage_training_programs(): void
     {
         $supervisor = User::factory()->create();
         $supervisor->assignRole(RoleName::MaintenanceSupervisor->value);
 
-        $this->actingAs($supervisor)->get(route('training.programs.index'))->assertOk();
+        $this->actingAs($supervisor)->get(route('training.programs.index'))->assertForbidden();
 
         $program = TrainingProgram::factory()->create();
         $this->actingAs($supervisor)->get(route('training.programs.edit', $program))->assertForbidden();

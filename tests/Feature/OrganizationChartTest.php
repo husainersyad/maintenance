@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\RoleName;
 use App\Models\Employee;
+use App\Models\EmploymentStatus;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,9 +14,14 @@ class OrganizationChartTest extends TestCase
 {
     use RefreshDatabase;
 
+    private EmploymentStatus $active;
+
     protected function setUp(): void
     {
         parent::setUp();
+
+        // The chart only lists employees whose status code is ACTIVE.
+        $this->active = EmploymentStatus::factory()->create(['code' => 'ACTIVE']);
 
         $this->seed(RolesAndPermissionsSeeder::class);
     }
@@ -41,9 +47,9 @@ class OrganizationChartTest extends TestCase
         $admin = User::factory()->create();
         $admin->assignRole(RoleName::Administrator->value);
 
-        $ceo = Employee::factory()->create(['full_name' => 'Top Boss', 'supervisor_id' => null]);
-        $manager = Employee::factory()->create(['full_name' => 'Middle Manager', 'supervisor_id' => $ceo->id]);
-        Employee::factory()->create(['full_name' => 'Bottom Staff', 'supervisor_id' => $manager->id]);
+        $ceo = Employee::factory()->create(['employment_status_id' => $this->active->id, 'full_name' => 'Top Boss', 'supervisor_id' => null]);
+        $manager = Employee::factory()->create(['employment_status_id' => $this->active->id, 'full_name' => 'Middle Manager', 'supervisor_id' => $ceo->id]);
+        Employee::factory()->create(['employment_status_id' => $this->active->id, 'full_name' => 'Bottom Staff', 'supervisor_id' => $manager->id]);
 
         $response = $this->actingAs($admin)->get(route('organization-chart.index'));
 
@@ -58,11 +64,11 @@ class OrganizationChartTest extends TestCase
     {
         $supervisorUser = User::factory()->create();
         $supervisorUser->assignRole(RoleName::MaintenanceSupervisor->value);
-        $supervisorEmployee = Employee::factory()->create(['user_id' => $supervisorUser->id, 'full_name' => 'Sup Person']);
+        $supervisorEmployee = Employee::factory()->create(['employment_status_id' => $this->active->id, 'user_id' => $supervisorUser->id, 'full_name' => 'Sup Person']);
 
-        $directReport = Employee::factory()->create(['supervisor_id' => $supervisorEmployee->id, 'full_name' => 'Direct Report']);
-        Employee::factory()->create(['supervisor_id' => $directReport->id, 'full_name' => 'Grandchild Report']);
-        Employee::factory()->create(['full_name' => 'Unrelated Person']);
+        $directReport = Employee::factory()->create(['employment_status_id' => $this->active->id, 'supervisor_id' => $supervisorEmployee->id, 'full_name' => 'Direct Report']);
+        Employee::factory()->create(['employment_status_id' => $this->active->id, 'supervisor_id' => $directReport->id, 'full_name' => 'Grandchild Report']);
+        Employee::factory()->create(['employment_status_id' => $this->active->id, 'full_name' => 'Unrelated Person']);
 
         $response = $this->actingAs($supervisorUser)->get(route('organization-chart.index'));
 
@@ -79,8 +85,8 @@ class OrganizationChartTest extends TestCase
         $admin = User::factory()->create();
         $admin->assignRole(RoleName::Administrator->value);
 
-        Employee::factory()->create(['full_name' => 'Blue Collar Person', 'workforce_category' => 'BC']);
-        Employee::factory()->create(['full_name' => 'White Collar Person', 'workforce_category' => 'WCM']);
+        Employee::factory()->create(['employment_status_id' => $this->active->id, 'full_name' => 'Blue Collar Person', 'workforce_category' => 'BC']);
+        Employee::factory()->create(['employment_status_id' => $this->active->id, 'full_name' => 'White Collar Person', 'workforce_category' => 'WCM']);
 
         $response = $this->actingAs($admin)->get(route('organization-chart.index'));
 
@@ -98,7 +104,7 @@ class OrganizationChartTest extends TestCase
         $blueNodeStart = strrpos(substr($content, 0, $bluePos), '<a href');
         $whiteNodeStart = strrpos(substr($content, 0, $whitePos), '<a href');
 
-        $this->assertStringContainsString('bg-blue-600', substr($content, $blueNodeStart, $bluePos - $blueNodeStart));
+        $this->assertStringContainsString('bg-accent-600', substr($content, $blueNodeStart, $bluePos - $blueNodeStart));
         $this->assertStringContainsString('bg-white', substr($content, $whiteNodeStart, $whitePos - $whiteNodeStart));
     }
 }
