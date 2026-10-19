@@ -71,6 +71,9 @@ class CompetencyGapAnalysisController extends Controller
             // null - so filtering on $key !== null let those groups through
             // and crashed the view on ->title of a null position.
             ->filter(fn ($group, $key) => $key !== null && $key !== '')
+            // A soft-deleted position keeps its position_id but the relation
+            // resolves to null, so drop those groups too.
+            ->filter(fn (Collection $group) => $group->first()['employee']->position !== null)
             ->map(function (Collection $group) {
                 $position = $group->first()['employee']->position;
 
@@ -86,6 +89,8 @@ class CompetencyGapAnalysisController extends Controller
         $areaBreakdown = $employeeSummaries
             ->groupBy(fn ($summary) => $summary['employee']->maintenance_area_id)
             ->filter(fn ($group, $key) => $key !== null && $key !== '')
+            // Same as above: skip soft-deleted areas whose relation is null.
+            ->filter(fn (Collection $group) => $group->first()['employee']->maintenanceArea !== null)
             ->map(function (Collection $group) {
                 $area = $group->first()['employee']->maintenanceArea;
 

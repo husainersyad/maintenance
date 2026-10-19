@@ -6,6 +6,7 @@ use App\Enums\RoleName;
 use App\Models\CompetencyLevel;
 use App\Models\Employee;
 use App\Models\EmployeeSkillAssessment;
+use App\Models\MaintenanceArea;
 use App\Models\Position;
 use App\Models\PositionSkillRequirement;
 use App\Models\Skill;
@@ -102,5 +103,30 @@ class CompetencyGapAnalysisTest extends TestCase
         $response->assertOk();
         $response->assertViewHas('summary', fn ($summary) => $summary['employees_with_gaps'] === 0);
         $response->assertViewHas('employeesWithGaps', fn ($list) => $list->isEmpty());
+    }
+
+    public function test_employees_with_soft_deleted_position_or_area_do_not_break_the_page(): void
+    {
+        $manager = User::factory()->create();
+        $manager->assignRole(RoleName::MaintenanceManager->value);
+        $managerEmployee = Employee::factory()->create(['user_id' => $manager->id]);
+
+        $position = Position::factory()->create();
+        $area = MaintenanceArea::factory()->create();
+        Employee::factory()->create([
+            'position_id' => $position->id,
+            'maintenance_area_id' => $area->id,
+            'supervisor_id' => $managerEmployee->id,
+        ]);
+
+        $position->delete();
+        $area->delete();
+
+        $response = $this->actingAs($manager)->get(route('competency-gap-analysis.index'));
+
+        $response->assertOk();
+        $response->assertViewHas('positionBreakdown', fn ($rows) => $rows->every(fn ($row) => $row['position'] !== null));
+        $response->assertViewHas('areaBreakdown', fn ($rows) => $rows->every(fn ($row) => $row['area'] !== null));
+        $response->assertViewHas('summary', fn ($summary) => $summary['total_employees_evaluated'] === 2);
     }
 }
