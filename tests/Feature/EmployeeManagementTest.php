@@ -192,8 +192,46 @@ class EmployeeManagementTest extends TestCase
         $response->assertOk();
         $response->assertSee('QR Test Employee');
         // The full URL is composed client-side from this relative path plus
-        // the (editable) base URL - see resources/js/qr-base-url.js.
+        // the site-wide (Administrator-only) base URL - see resources/js/qr-base-url.js.
         $response->assertSee(route('verify.employee', $employee, false), false);
+    }
+
+    public function test_administrator_can_change_the_qr_base_url(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole(RoleName::Administrator->value);
+
+        $this->actingAs($admin)
+            ->put(route('employees.qr-codes.base-url'), ['qr_base_url' => 'https://mpd.example.com/'])
+            ->assertRedirect();
+
+        $this->assertSame('https://mpd.example.com', \App\Models\Setting::get('qr_base_url'));
+        $this->actingAs($admin)->get(route('employees.qr-codes'))
+            ->assertSee('data-base-url="https://mpd.example.com"', false);
+    }
+
+    public function test_non_administrators_cannot_change_the_qr_base_url(): void
+    {
+        foreach ([RoleName::MaintenanceManager, RoleName::PeopleDevelopment, RoleName::MaintenanceStaff, RoleName::Guest] as $role) {
+            $user = User::factory()->create();
+            $user->assignRole($role->value);
+
+            $this->actingAs($user)
+                ->put(route('employees.qr-codes.base-url'), ['qr_base_url' => 'https://evil.example.com'])
+                ->assertForbidden();
+        }
+
+        $this->assertSame('', \App\Models\Setting::get('qr_base_url'));
+    }
+
+    public function test_qr_base_url_must_be_a_valid_http_url(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole(RoleName::Administrator->value);
+
+        $this->actingAs($admin)
+            ->put(route('employees.qr-codes.base-url'), ['qr_base_url' => 'javascript:alert(1)'])
+            ->assertSessionHasErrors('qr_base_url');
     }
 
     public function test_maintenance_staff_only_sees_their_own_qr_code(): void
