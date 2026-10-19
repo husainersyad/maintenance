@@ -161,4 +161,20 @@ class SkillCatalogTest extends TestCase
         $this->actingAs($admin)->get(route('employees.skill-checklist.edit', $employee))->assertOk();
         $this->actingAs($admin)->get(route('employees.show', $employee))->assertOk()->assertSee('Review checklist');
     }
+
+    public function test_gap_rows_ignore_requirements_whose_skill_was_deleted(): void
+    {
+        $position = Position::factory()->create();
+        $level = \App\Models\CompetencyLevel::factory()->create();
+        [$kept, $deleted] = Skill::factory()->count(2)->create();
+
+        foreach ([$kept, $deleted] as $skill) {
+            $position->skillRequirements()->create(['skill_id' => $skill->id, 'required_competency_level_id' => $level->id]);
+        }
+        $deleted->delete();
+
+        $employee = Employee::factory()->create(['position_id' => $position->id]);
+
+        $this->assertSame([$kept->id], $employee->skillGapRows()->pluck('skill.id')->values()->all());
+    }
 }

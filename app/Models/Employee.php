@@ -300,26 +300,30 @@ class Employee extends Model
 
         $currentLevels = $this->currentSkillAssessments();
 
-        return $requirements->map(function (PositionSkillRequirement $requirement) use ($currentLevels) {
-            $current = $currentLevels->get($requirement->skill_id)?->competencyLevel;
-            $required = $requirement->requiredCompetencyLevel;
-            $gap = $current ? $required->level_number - $current->level_number : null;
+        // A requirement whose skill was (soft-)deleted from the catalog has no
+        // skill to compare against, so it is left out rather than breaking
+        // every screen that lists gap rows.
+        return $requirements->filter(fn (PositionSkillRequirement $requirement) => $requirement->skill !== null)
+            ->map(function (PositionSkillRequirement $requirement) use ($currentLevels) {
+                $current = $currentLevels->get($requirement->skill_id)?->competencyLevel;
+                $required = $requirement->requiredCompetencyLevel;
+                $gap = $current ? $required->level_number - $current->level_number : null;
 
-            $status = match (true) {
-                is_null($current) => 'incomplete',
-                $gap > 0 => 'gap',
-                $gap === 0 => 'meets',
-                default => 'exceeds',
-            };
+                $status = match (true) {
+                    is_null($current) => 'incomplete',
+                    $gap > 0 => 'gap',
+                    $gap === 0 => 'meets',
+                    default => 'exceeds',
+                };
 
-            return [
-                'skill' => $requirement->skill,
-                'current' => $current,
-                'required' => $required,
-                'gap' => $gap,
-                'status' => $status,
-            ];
-        });
+                return [
+                    'skill' => $requirement->skill,
+                    'current' => $current,
+                    'required' => $required,
+                    'gap' => $gap,
+                    'status' => $status,
+                ];
+            });
     }
 
     /**
