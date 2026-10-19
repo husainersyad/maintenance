@@ -5,6 +5,7 @@ import './dashboard-charts';
 import './qrcode-canvas';
 import './qr-base-url';
 import { registerUi } from './ui';
+import { registerSidebar } from './sidebar';
 
 // face-login.js pulls in face-api.js/TensorFlow.js, a large dependency -
 // dynamically imported so pages that never touch Face Login (i.e. almost
@@ -27,5 +28,6 @@ if (document.querySelector('trix-editor')) {
 
 window.Alpine = Alpine;
 registerUi(Alpine);
+registerSidebar(Alpine);
 
 Alpine.start();

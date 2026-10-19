@@ -5,3 +5,25 @@
 [x-cloak] {
     display: none !important;
 }
+
+/*
+ * Desktop sidebar width. Driven by html[data-sidebar] (set before first paint
+ * by an inline script in the layout and toggled by the `layout` Alpine store)
+ * so a saved "collapsed" state never flashes open on page load.
+ */
+@media (min-width: 1024px) {
+    #desktop-sidebar {
+        width: 17rem;
+        transition: width 200ms ease;
+    }
+
+    html[data-sidebar='collapsed'] #desktop-sidebar {
+        width: 4.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #desktop-sidebar {
+        transition: none;
+    }
+}

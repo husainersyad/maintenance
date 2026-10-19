@@ -88,28 +88,56 @@ $trainingSectionActive = $trainingManagementActive || $trainingCalendarActive ||
 $taskSectionActive = $myTaskActive || $shiftCommActive;
 $safetySectionActive = $lototoActive;
 $insightsSectionActive = request()->routeIs('admin.menu-visibility.*') || $reportsActive || $userManagementActive || $roleManagementActive || $auditLogActive || $settingsActive || $newsActive;
+$groupIcons = [
+    'Task' => 'M9 12.75L11.25 15 15 9.75M6 4.5h12A1.5 1.5 0 0119.5 6v12a1.5 1.5 0 01-1.5 1.5H6A1.5 1.5 0 014.5 18V6A1.5 1.5 0 016 4.5z',
+    'People & Organization' => 'M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z',
+    'Competency' => 'M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342',
+    'Training & Development' => 'M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5',
+    'Safety' => 'M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z',
+    'Insights & System' => 'M3 13.5l3-3m0 0l3 3m-3-3v9m6-9l3-3m0 0l3 3m-3-3v12',
+];
+
+$mobile = $mobile ?? false;
 @endphp
 
-<div class="flex h-full grow flex-col bg-neutral-900">
-    <div class="flex h-16 shrink-0 items-center gap-3 border-b border-neutral-800 px-4">
+<div id="{{ $mobile ? 'mobile-sidebar' : 'desktop-sidebar-inner' }}"
+     x-data="sidebar({{ $mobile ? 'true' : 'false' }})"
+     class="flex h-full min-w-0 grow flex-col overflow-hidden bg-neutral-900">
+    <div class="flex h-16 shrink-0 items-center gap-3 border-b border-neutral-800"
+         :class="rail ? 'justify-center px-0' : 'px-4'">
         <div class="flex h-9 w-9 shrink-0 items-center justify-center" title="PT Bekaert Indonesia">
             <img src="{{ asset('images/logo.png') }}" alt="PT Bekaert Indonesia" class="h-full w-full object-contain">
         </div>
-        <div class="leading-tight">
-            <p class="text-sm font-semibold text-white">MPD System</p>
-            <p class="text-[11px] text-neutral-400">PT Bekaert Indonesia</p>
+        <div x-show="! rail" class="min-w-0 leading-tight">
+            <p class="truncate text-sm font-semibold text-white">MPD System</p>
+            <p class="truncate text-[11px] text-neutral-400">PT Bekaert Indonesia</p>
         </div>
     </div>
 
-    <nav class="flex-1 divide-y divide-neutral-800/70 overflow-y-auto px-3 py-4 [&>*]:py-2 [&>*:first-child]:pt-0 [&>*:last-child]:pb-0">
+    <div class="shrink-0 px-3 pt-3">
+        <button type="button"
+                @click="$dispatch('open-menu-search'); sidebarOpen = false"
+                @mouseenter="showTip($el)" @mouseleave="hideTip()"
+                data-label="Search menu"
+                class="flex w-full items-center gap-2.5 rounded-md bg-neutral-800 py-2 text-sm text-neutral-400 transition-colors hover:bg-neutral-700 hover:text-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+                :class="rail ? 'justify-center px-0' : 'px-3'">
+            <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            <span :class="rail ? 'sr-only' : 'flex-1 text-left'">Search menu…</span>
+            <kbd x-show="! rail && ! mobile" class="rounded border border-neutral-600 px-1.5 py-0.5 text-[10px] font-medium text-neutral-400" x-text="modifier + ' K'"></kbd>
+        </button>
+    </div>
+
+    <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-3" @scroll.passive="hideTip()" aria-label="Main navigation">
         <div class="space-y-1">
-            <x-nav-item :href="route('dashboard')" :active="$dashboardActive" icon="M3.75 12l1.5-1.5m0 0l6-6 6 6m-6-6v18m6-9l1.5 1.5M4.5 19.5h15">
+            <x-nav-item :href="route('dashboard')" :active="$dashboardActive" top icon="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z">
                 Dashboard
             </x-nav-item>
         </div>
 
         @if ($showTasks || $showShiftComm)
-            <x-nav-group label="Task" :active="$taskSectionActive">
+            <x-nav-group label="Task" :icon="$groupIcons['Task']" :active="$taskSectionActive">
                 @if ($showTasks)
                 <x-nav-item :href="route('tasks.index')" :active="$myTaskActive" icon="M9 12.75L11.25 15 15 9.75M6 4.5h12A1.5 1.5 0 0119.5 6v12a1.5 1.5 0 01-1.5 1.5H6A1.5 1.5 0 014.5 18V6A1.5 1.5 0 016 4.5z">
                     My Task
@@ -124,7 +152,7 @@ $insightsSectionActive = request()->routeIs('admin.menu-visibility.*') || $repor
         @endif
 
         @if ($showOrganizationSection)
-            <x-nav-group label="People & Organization" :active="$organizationSectionActive">
+            <x-nav-group label="People & Organization" :icon="$groupIcons['People & Organization']" :active="$organizationSectionActive">
                 @if ($showEmployees)
 <x-nav-item :href="route('employees.index')" :active="$employeesActive" icon="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z">
                         Employees
@@ -154,7 +182,7 @@ $insightsSectionActive = request()->routeIs('admin.menu-visibility.*') || $repor
         @endif
 
         @if ($showCompetencySection)
-            <x-nav-group label="Competency" :active="$competencySectionActive">
+            <x-nav-group label="Competency" :icon="$groupIcons['Competency']" :active="$competencySectionActive">
                 @if ($showJobDescriptions)
                     <x-nav-item :href="route('job-descriptions.index')" :active="$jobDescriptionsActive" icon="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25">
                         Job Descriptions
@@ -179,7 +207,7 @@ $insightsSectionActive = request()->routeIs('admin.menu-visibility.*') || $repor
         @endif
 
         @if ($showTrainingSection)
-            <x-nav-group label="Training & Development" :active="$trainingSectionActive">
+            <x-nav-group label="Training & Development" :icon="$groupIcons['Training & Development']" :active="$trainingSectionActive">
                 @if ($showTrainingManagement)
                     <x-nav-item :href="route('training.programs.index')" :active="$trainingManagementActive" icon="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5">
                         Training Management
@@ -219,7 +247,7 @@ $insightsSectionActive = request()->routeIs('admin.menu-visibility.*') || $repor
         @endif
 
         @if ($showSafetySection)
-            <x-nav-group label="Safety" :active="$safetySectionActive">
+            <x-nav-group label="Safety" :icon="$groupIcons['Safety']" :active="$safetySectionActive">
                 @if ($showLototo)
                     <x-nav-item :href="route('safety.lototo.index')" :active="$lototoActive" icon="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z">
                         LOTOTO
@@ -229,7 +257,7 @@ $insightsSectionActive = request()->routeIs('admin.menu-visibility.*') || $repor
         @endif
 
         @if ($showInsightsSection)
-            <x-nav-group label="Insights & System" :active="$insightsSectionActive">
+            <x-nav-group label="Insights & System" :icon="$groupIcons['Insights & System']" :active="$insightsSectionActive">
                 @if ($showReports)
                     <x-nav-item :href="route('reports.index')" :active="$reportsActive" icon="M3 13.5l3-3m0 0l3 3m-3-3v9m6-9l3-3m0 0l3 3m-3-3v12">
                         Reports
@@ -263,7 +291,24 @@ $insightsSectionActive = request()->routeIs('admin.menu-visibility.*') || $repor
         @endif
     </nav>
 
-    <div class="border-t border-neutral-800 p-4 text-[11px] leading-relaxed text-neutral-500">
-        Officially from PTBI Maintenance Academy, developed by <a href="mailto:fajar.sodiq@bekaert.com" class="text-neutral-400 underline hover:text-white">fajar.sodiq@bekaert.com</a>
+    <div class="shrink-0 border-t border-neutral-800 p-3">
+        <button type="button"
+                x-show="! mobile"
+                @click="$store.layout.toggle(); hideTip()"
+                @mouseenter="showTip($el)" @mouseleave="hideTip()"
+                :data-label="rail ? 'Expand sidebar' : 'Collapse sidebar'"
+                :aria-label="rail ? 'Expand sidebar' : 'Collapse sidebar'"
+                :aria-expanded="(! rail).toString()"
+                class="flex w-full items-center gap-2.5 rounded-md py-2 text-xs font-medium text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+                :class="rail ? 'justify-center px-0' : 'px-3'">
+            <svg class="h-5 w-5 shrink-0 transition-transform duration-200" :class="{ 'rotate-180': rail }" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
+            </svg>
+            <span x-show="! rail">Collapse sidebar</span>
+        </button>
+
+        <p x-show="! rail" class="mt-2 px-3 text-[10px] leading-relaxed text-neutral-500">
+            Officially from PTBI Maintenance Academy, developed by <a href="mailto:fajar.sodiq@bekaert.com" class="text-neutral-400 underline hover:text-white">fajar.sodiq@bekaert.com</a>
+        </p>
     </div>
 </div>
