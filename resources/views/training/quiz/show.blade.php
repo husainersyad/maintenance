@@ -23,7 +23,7 @@
                 <p class="mt-1 text-sm font-semibold {{ $passed ? 'text-success-800' : 'text-danger-800' }}">{{ $passed ? 'PASSED' : 'NOT PASSED' }}</p>
                 @if ($passed)
                     <p class="mt-2 text-sm text-neutral-600">Certificate No. <strong>{{ $participant->certificate->certificate_number }}</strong></p>
-                    <a href="{{ route('certificates.show', $participant->certificate) }}" target="_blank" class="mt-3 inline-block rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">View Certificate</a>
+                    <x-button href="{{ route('certificates.show', $participant->certificate) }}" target="_blank" class="mt-3">View Certificate</x-button>
                 @else
                     <p class="mt-2 text-sm text-neutral-600">No certificate was issued. Please contact People Development about a re-training.</p>
                 @endif
@@ -31,7 +31,7 @@
         @elseif (! $eligible)
             <div class="rounded-md border border-warning-200 bg-warning-50 px-4 py-3 text-sm text-warning-800">{{ $message }}</div>
         @else
-            <form method="POST" action="{{ route('training.quiz.submit', $participant) }}" onsubmit="return confirm('Answers cannot be changed after submitting. Continue?');" class="space-y-4">
+            <form method="POST" action="{{ route('training.quiz.submit', $participant) }}" data-confirm="Answers cannot be changed after submitting. Continue?" class="space-y-4">
                 @csrf
                 @foreach ($questions as $question)
                     <div class="rounded-lg border border-neutral-200 bg-white p-4 shadow-md">
@@ -51,7 +51,7 @@
                     </div>
                 @endforeach
 
-                <button type="submit" class="w-full rounded-md bg-brand-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Submit Answers</button>
+                <x-button type="submit" class="w-full">Submit Answers</x-button>
             </form>
         @endif
     </div>

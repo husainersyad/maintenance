@@ -27,7 +27,7 @@
             </div>
 
             <div class="mt-6 flex justify-end">
-                <button type="submit" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Save Settings</button>
+                <x-button type="submit">Save Settings</x-button>
             </div>
         </form>
     </div>

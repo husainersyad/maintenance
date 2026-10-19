@@ -81,8 +81,8 @@
                 </select>
 
                 <div class="flex gap-2">
-                    <button type="submit" class="rounded-md bg-brand-600 px-3.5 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Filter</button>
-                    <a href="{{ route('organization-chart.index') }}" class="rounded-md border border-neutral-300 px-3.5 py-1.5 text-sm font-medium text-neutral-600 shadow-sm transition hover:border-accent-400 hover:bg-accent-50 hover:text-accent-700">Reset</a>
+                    <x-button size="sm" type="submit">Filter</x-button>
+                    <x-button variant="secondary" size="sm" href="{{ route('organization-chart.index') }}">Reset</x-button>
                 </div>
             </form>
         </x-filter-panel>
@@ -108,8 +108,8 @@
                 </span>
             @endif
             <span class="ml-auto inline-flex gap-2">
-                <button type="button" @click="$dispatch('org-expand-all')" class="rounded-md border border-neutral-300 bg-white px-3 py-1 text-xs font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">Expand all</button>
-                <button type="button" @click="$dispatch('org-collapse-all')" class="rounded-md border border-neutral-300 bg-white px-3 py-1 text-xs font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">Collapse all</button>
+                <x-button variant="secondary" size="xs" type="button" @click="$dispatch('org-expand-all')">Expand all</x-button>
+                <x-button variant="secondary" size="xs" type="button" @click="$dispatch('org-collapse-all')">Collapse all</x-button>
             </span>
         </div>
 

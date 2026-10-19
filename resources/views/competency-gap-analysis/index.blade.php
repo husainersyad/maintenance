@@ -32,8 +32,8 @@
                 </select>
 
                 <div class="flex gap-2">
-                    <button type="submit" class="rounded-md bg-brand-600 px-3.5 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Filter</button>
-                    <a href="{{ route('competency-gap-analysis.index') }}" class="rounded-md border border-neutral-300 px-3.5 py-1.5 text-sm font-medium text-neutral-600 transition shadow-sm hover:border-accent-400 hover:bg-accent-50 hover:text-accent-700">Reset</a>
+                    <x-button size="sm" type="submit">Filter</x-button>
+                    <x-button variant="secondary" size="sm" href="{{ route('competency-gap-analysis.index') }}">Reset</x-button>
                 </div>
             </form>
         </x-filter-panel>

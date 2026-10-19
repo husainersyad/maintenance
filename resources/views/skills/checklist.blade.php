@@ -89,7 +89,7 @@
             </div>
 
             @if (auth()->user()->canEditMenu(\App\Enums\MenuKey::SkillsCompetencies))
-                <button class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-700">Save checklist</button>
+                <x-button type="submit">Save checklist</x-button>
             @else
                 <p class="text-xs text-neutral-500">You have read-only access to this menu.</p>
             @endif

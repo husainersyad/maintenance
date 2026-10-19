@@ -22,7 +22,7 @@ $attendanceStyles = ['invited' => 'bg-neutral-100 text-neutral-600', 'confirmed'
                 @can(\App\Enums\PermissionName::ManageTraining->value)
                     <div class="flex items-center gap-2">
                         <a href="{{ route('training.sessions.check-in', $trainingSession) }}" class="rounded-md border border-brand-300 px-3 py-1.5 text-sm font-medium text-brand-700 shadow-sm transition hover:bg-brand-50">Face Check-in</a>
-                        <a href="{{ route('training.sessions.edit', $trainingSession) }}" class="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">Edit</a>
+                        <x-button variant="secondary" size="sm" href="{{ route('training.sessions.edit', $trainingSession) }}">Edit</x-button>
                     </div>
                 @endcan
             </div>
@@ -70,7 +70,7 @@ $attendanceStyles = ['invited' => 'bg-neutral-100 text-neutral-600', 'confirmed'
                                             {{ $participant->quiz_submitted_at ? 'View Quiz' : 'Quiz status' }}
                                         </a>
                                         @can(\App\Enums\PermissionName::ManageTraining->value)
-                                            <form method="POST" action="{{ route('training.sessions.participants.destroy', [$trainingSession, $participant]) }}" onsubmit="return confirm('Remove this participant?');">
+                                            <form method="POST" action="{{ route('training.sessions.participants.destroy', [$trainingSession, $participant]) }}" data-confirm="Remove this participant?">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="text-danger-600 hover:underline">Remove</button>
@@ -97,7 +97,7 @@ $attendanceStyles = ['invited' => 'bg-neutral-100 text-neutral-600', 'confirmed'
                             <option value="{{ $employee->id }}">{{ $employee->full_name }} ({{ $employee->employee_number }})</option>
                         @endforeach
                     </select>
-                    <button type="submit" class="shrink-0 rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Add</button>
+                    <x-button type="submit" class="shrink-0">Add</x-button>
                 </form>
             </div>
         @endcan

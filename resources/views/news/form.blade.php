@@ -100,9 +100,9 @@ $old = fn ($field, $default = null) => old($field, $news?->$field ?? $default);
             </div>
 
             <div class="mt-6 flex items-center gap-3">
-                <button type="submit" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">
+                <x-button type="submit">
                     {{ $isEdit ? 'Save Changes' : 'Publish News' }}
-                </button>
+                </x-button>
                 <a href="{{ route('news.index') }}" class="text-sm text-neutral-600 hover:underline">Cancel</a>
             </div>
         </form>

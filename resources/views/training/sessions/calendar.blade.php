@@ -25,8 +25,8 @@ $sessionStatusStyles = ['scheduled' => 'bg-accent-100 text-accent-800', 'ongoing
                             <option value="{{ $status }}" @selected(($filters['status'] ?? null) === $status)>{{ ucfirst($status) }}</option>
                         @endforeach
                     </select>
-                    <button type="submit" class="rounded-md bg-brand-600 px-3.5 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Filter</button>
-                    <a href="{{ route('training.calendar', ['view' => $view]) }}" class="rounded-md border border-neutral-300 px-3.5 py-1.5 text-sm font-medium text-neutral-600 transition shadow-sm hover:border-accent-400 hover:bg-accent-50 hover:text-accent-700">Reset</a>
+                    <x-button size="sm" type="submit">Filter</x-button>
+                    <x-button variant="secondary" size="sm" href="{{ route('training.calendar', ['view' => $view]) }}">Reset</x-button>
                 </form>
             </x-filter-panel>
 
@@ -41,11 +41,9 @@ $sessionStatusStyles = ['scheduled' => 'bg-accent-100 text-accent-800', 'ongoing
         @if ($view === 'grid')
             <div class="rounded-lg border border-neutral-200 bg-white p-4 shadow-md">
                 <div class="mb-4 flex items-center justify-between">
-                    <a href="{{ route('training.calendar', array_merge($filters, ['view' => 'grid', 'month' => $month->copy()->subMonth()->format('Y-m')])) }}"
-                       class="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">&larr; Prev</a>
+                    <x-button variant="secondary" size="sm" href="{{ route('training.calendar', array_merge($filters, ['view' => 'grid', 'month' => $month->copy()->subMonth()->format('Y-m')])) }}">&larr; Prev</x-button>
                     <h2 class="text-lg font-semibold text-neutral-900">{{ $month->format('F Y') }}</h2>
-                    <a href="{{ route('training.calendar', array_merge($filters, ['view' => 'grid', 'month' => $month->copy()->addMonth()->format('Y-m')])) }}"
-                       class="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">Next &rarr;</a>
+                    <x-button variant="secondary" size="sm" href="{{ route('training.calendar', array_merge($filters, ['view' => 'grid', 'month' => $month->copy()->addMonth()->format('Y-m')])) }}">Next &rarr;</x-button>
                 </div>
 
                 <div class="grid grid-cols-7 gap-px overflow-hidden rounded-md border border-neutral-200 bg-neutral-200 text-xs">

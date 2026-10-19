@@ -13,18 +13,18 @@
 
         <div class="flex items-center gap-4">
             @if (Auth::guest())
-                <a href="{{ route('login') }}" class="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">
+                <x-button variant="secondary" size="sm" href="{{ route('login') }}">
                     {{ __('Login') }}
-                </a>
+                </x-button>
             @elseif (Auth::user()->hasRole(\App\Enums\RoleName::Guest->value))
                 {{-- The visitor is signed into the shared read-only Guest
                      account, which the "guest" middleware still counts as
                      authenticated - log it out first so /login is reachable. --}}
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">
+                    <x-button variant="secondary" size="sm" type="submit">
                         {{ __('Login') }}
-                    </button>
+                    </x-button>
                 </form>
             @endif
 

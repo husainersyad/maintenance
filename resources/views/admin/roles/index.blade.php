@@ -11,10 +11,9 @@
                 Edit which permissions each role grants, then save. If a role has drifted from the app's baseline, use
                 <span class="font-medium text-neutral-800">Reset to default</span> to restore its original permission set.
             </p>
-            <button type="button" @click="resetOpen = true"
-                    class="shrink-0 rounded-md border border-brand-300 bg-brand-50 px-3.5 py-1.5 text-sm font-medium text-brand-700 shadow-sm transition hover:bg-brand-100">
+            <x-button variant="soft" size="sm" type="button" @click="resetOpen = true" class="shrink-0">
                 Reset roles to default…
-            </button>
+            </x-button>
         </div>
 
         {{-- Bulk reset dialog: pick any subset of roles (or all) and reapply RoleName::defaultPermissions(). --}}
@@ -48,11 +47,10 @@
                     </div>
 
                     <div class="flex justify-end gap-2 pt-2">
-                        <button type="button" @click="resetOpen = false" class="rounded-md border border-neutral-300 px-3.5 py-1.5 text-sm font-medium text-neutral-600 shadow-sm transition hover:bg-neutral-50">Cancel</button>
-                        <button type="submit" class="rounded-md bg-brand-600 px-3.5 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700"
-                                onclick="return confirm('Reset the selected roles\' permissions to default? Custom changes will be lost.')">
+                        <x-button variant="secondary" size="sm" type="button" @click="resetOpen = false">Cancel</x-button>
+                        <x-button size="sm" type="submit" data-confirm="Reset the selected roles' permissions to default? Custom changes will be lost.">
                             Reset to default
-                        </button>
+                        </x-button>
                     </div>
                 </form>
             </div>
@@ -104,18 +102,17 @@
                         </div>
 
                         <div class="flex items-center justify-between">
-                            <button type="submit" form="reset-role-{{ $role->id }}"
-                                    class="rounded-md border border-neutral-300 px-3.5 py-1.5 text-sm font-medium text-neutral-600 transition shadow-sm hover:border-accent-400 hover:bg-accent-50 hover:text-accent-700">
+                            <x-button variant="secondary" size="sm" type="submit" form="reset-role-{{ $role->id }}">
                                 Reset this role to default
-                            </button>
-                            <button type="submit" class="rounded-md bg-brand-600 px-4 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">
+                            </x-button>
+                            <x-button size="sm" type="submit">
                                 Save {{ $roleName->label() }}
-                            </button>
+                            </x-button>
                         </div>
                     </form>
 
                     <form id="reset-role-{{ $role->id }}" method="POST" action="{{ route('admin.roles.reset-defaults') }}"
-                          onsubmit="return confirm('Reset &quot;{{ $roleName->label() }}&quot; to its default permissions? Unsaved changes above will be discarded.')">
+                          data-confirm="Reset &quot;{{ $roleName->label() }}&quot; to its default permissions? Unsaved changes above will be discarded.">
                         @csrf
                         <input type="hidden" name="roles[]" value="{{ $roleName->value }}">
                     </form>

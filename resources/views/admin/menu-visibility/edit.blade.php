@@ -54,7 +54,7 @@
             </div>
 
             <div class="flex items-center gap-3">
-                <button type="submit" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Save</button>
+                <x-button type="submit">Save</x-button>
                 <a href="{{ route('admin.menu-visibility.index') }}" class="text-sm text-neutral-600 hover:underline">Back</a>
             </div>
         </form>

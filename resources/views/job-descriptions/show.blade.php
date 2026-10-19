@@ -66,13 +66,13 @@ $statusLabels = [
             @can(\App\Enums\PermissionName::ManageJobDescriptions->value)
                 <div class="flex flex-wrap gap-2">
                     @if ($jobDescription->status !== 'archived')
-                        <a href="{{ route('job-descriptions.edit', $jobDescription) }}" class="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">Edit</a>
+                        <x-button variant="secondary" href="{{ route('job-descriptions.edit', $jobDescription) }}">Edit</x-button>
                     @endif
 
                     @if ($jobDescription->status === 'draft')
                         <form method="POST" action="{{ route('job-descriptions.submit-for-review', $jobDescription) }}">
                             @csrf
-                            <button type="submit" class="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">Submit for Review</button>
+                            <x-button variant="secondary" type="submit">Submit for Review</x-button>
                         </form>
                     @endif
 
@@ -84,15 +84,15 @@ $statusLabels = [
                     @endif
 
                     @if ($jobDescription->status === 'active')
-                        <form method="POST" action="{{ route('job-descriptions.archive', $jobDescription) }}" onsubmit="return confirm('Archive this job description?');">
+                        <form method="POST" action="{{ route('job-descriptions.archive', $jobDescription) }}" data-confirm="Archive this job description?">
                             @csrf
-                            <button type="submit" class="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">Archive</button>
+                            <x-button variant="secondary" type="submit">Archive</x-button>
                         </form>
                     @endif
 
                     <form method="POST" action="{{ route('job-descriptions.new-revision', $jobDescription) }}">
                         @csrf
-                        <button type="submit" class="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">Create New Revision</button>
+                        <x-button variant="secondary" type="submit">Create New Revision</x-button>
                     </form>
                 </div>
             @endcan

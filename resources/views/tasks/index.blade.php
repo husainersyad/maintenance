@@ -68,7 +68,7 @@ $priorityStyles = ['urgent' => 'bg-danger-100 text-danger-700', 'high' => 'bg-wa
                     <h3 class="text-sm font-semibold text-neutral-900">New Plan</h3>
                     <input type="text" name="name" required maxlength="120" placeholder="Plan name" class="block w-full rounded-md border-neutral-300 text-sm">
                     <textarea name="description" rows="2" maxlength="1000" placeholder="Description (optional)" class="block w-full rounded-md border-neutral-300 text-sm"></textarea>
-                    <button type="submit" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Create Plan</button>
+                    <x-button type="submit">Create Plan</x-button>
                 </form>
             </div>
         </div>

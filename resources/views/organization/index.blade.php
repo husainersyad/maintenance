@@ -17,13 +17,12 @@ $originQuery = array_filter(['from' => $from]);
         <div class="flex items-center justify-between">
             <a href="{{ $backRoute }}" class="text-sm text-neutral-600 hover:underline">&larr; {{ $backLabel }}</a>
             <div class="flex items-center gap-2">
-                <a href="{{ route('organization.export', $type) }}"
-                   class="inline-flex items-center gap-1.5 rounded-md border border-neutral-300 bg-white px-3.5 py-2 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">
+                <x-button variant="secondary" href="{{ route('organization.export', $type) }}">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
                     </svg>
                     Export XLSX
-                </a>
+                </x-button>
 
                 @if (auth()->user()->canEditMenu(\App\Enums\MenuKey::Organization))
                     <form method="POST" action="{{ route('organization.import', $type) }}" enctype="multipart/form-data">
@@ -40,9 +39,9 @@ $originQuery = array_filter(['from' => $from]);
                     <div class="h-6 w-px bg-neutral-200"></div>
                 @endif
 
-                <a href="{{ route('organization.create', [$type, ...$originQuery]) }}" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">
+                <x-button href="{{ route('organization.create', [$type, ...$originQuery]) }}">
                     Add {{ $config['singular'] }}
-                </a>
+                </x-button>
             </div>
         </div>
 
@@ -87,7 +86,7 @@ $originQuery = array_filter(['from' => $from]);
                             <td class="px-3 py-2 text-right">
                                 <a href="{{ route('organization.edit', [$type, $record->id, ...$originQuery]) }}" class="font-medium text-accent-600 hover:underline">Edit</a>
                                 <form method="POST" action="{{ route('organization.destroy', [$type, $record->id, ...$originQuery]) }}" class="inline"
-                                      onsubmit="return confirm('Delete this {{ strtolower($config['singular']) }}? This cannot be undone.');">
+                                      data-confirm="Delete this {{ strtolower($config['singular']) }}? This cannot be undone.">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="ml-3 text-danger-600 hover:underline">Delete</button>

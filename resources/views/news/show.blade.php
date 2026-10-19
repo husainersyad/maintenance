@@ -40,7 +40,7 @@
                             <input type="checkbox" x-model="agreed" class="mt-0.5 rounded border-neutral-300">
                             <span>I have read and understood this announcement.</span>
                         </label>
-                        <button type="submit" :disabled="!agreed" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50">Confirm</button>
+                        <x-button type="submit" ::disabled="!agreed">Confirm</x-button>
                     </form>
                 @endif
             </div>

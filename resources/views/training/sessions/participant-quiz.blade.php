@@ -20,14 +20,14 @@
                 <p class="mt-2 text-xs text-neutral-500">Submitted {{ $participant->quiz_submitted_at->format('d M Y H:i') }}</p>
                 @if ($passed)
                     <p class="mt-2 text-sm text-neutral-600">Certificate No. <strong>{{ $participant->certificate->certificate_number }}</strong></p>
-                    <a href="{{ route('certificates.show', $participant->certificate) }}" target="_blank" class="mt-3 inline-block rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">View Certificate</a>
+                    <x-button href="{{ route('certificates.show', $participant->certificate) }}" target="_blank" class="mt-3">View Certificate</x-button>
                 @else
                     <p class="mt-2 text-sm text-neutral-600">No certificate was issued.</p>
                 @endif
 
                 @can(\App\Enums\PermissionName::ManageTraining->value)
                     <form method="POST" action="{{ route('training.sessions.participants.quiz-reset', [$trainingSession, $participant]) }}" class="mt-4"
-                          onsubmit="return confirm('Reset this quiz? The recorded answers{{ $passed ? ' and the issued certificate' : '' }} will be deleted, and the participant can take the quiz again. This cannot be undone.');">
+                          data-confirm="Reset this quiz? The recorded answers{{ $passed ? ' and the issued certificate' : '' }} will be deleted, and the participant can take the quiz again. This cannot be undone.">
                         @csrf
                         <button type="submit" class="rounded-md border border-danger-300 px-4 py-2 text-sm font-medium text-danger-700 hover:bg-danger-50">Reset Quiz</button>
                     </form>

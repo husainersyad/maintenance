@@ -94,7 +94,7 @@
 
             <div class="flex items-center justify-between">
                 <p class="text-xs text-neutral-400">Created by {{ $task->creator->name }} on {{ $task->created_at->format('d M Y') }}@if ($task->completed_at) &middot; completed {{ $task->completed_at->format('d M Y') }}@endif</p>
-                <button type="submit" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Save</button>
+                <x-button type="submit">Save</x-button>
             </div>
         </form>
 
@@ -122,7 +122,7 @@
             </form>
         </div>
 
-        <form method="POST" action="{{ route('tasks.destroy', $task) }}" onsubmit="return confirm('Delete this task?');">
+        <form method="POST" action="{{ route('tasks.destroy', $task) }}" data-confirm="Delete this task?">
             @csrf @method('DELETE')
             <button type="submit" class="text-sm text-danger-600 hover:underline">Delete task</button>
         </form>

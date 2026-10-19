@@ -22,7 +22,7 @@ $priorityStyles = ['urgent' => 'bg-danger-100 text-danger-700', 'high' => 'bg-wa
                 <a href="{{ route('tasks.plans.show', $plan) }}" class="rounded-md border px-3 py-1.5 {{ ! $mine ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-neutral-300 text-neutral-600 hover:bg-neutral-50' }}">All tasks</a>
                 <a href="{{ route('tasks.plans.show', [$plan, 'filter' => 'mine']) }}" class="rounded-md border px-3 py-1.5 {{ $mine ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-neutral-300 text-neutral-600 hover:bg-neutral-50' }}">Assigned to me</a>
                 @if ($canManage)
-                    <form method="POST" action="{{ route('tasks.plans.destroy', $plan) }}" onsubmit="return confirm('Delete this plan and all its tasks?');">
+                    <form method="POST" action="{{ route('tasks.plans.destroy', $plan) }}" data-confirm="Delete this plan and all its tasks?">
                         @csrf @method('DELETE')
                         <button type="submit" class="rounded-md border border-danger-300 px-3 py-1.5 text-danger-700 hover:bg-danger-50">Delete plan</button>
                     </form>
@@ -43,7 +43,7 @@ $priorityStyles = ['urgent' => 'bg-danger-100 text-danger-700', 'high' => 'bg-wa
                             </form>
                             <div x-show="!editing" class="flex gap-2 text-xs text-neutral-400">
                                 <button type="button" @click="editing = true" class="hover:text-neutral-700">Rename</button>
-                                <form method="POST" action="{{ route('tasks.plans.buckets.destroy', [$plan, $bucket]) }}" onsubmit="return confirm('Delete this bucket?');">
+                                <form method="POST" action="{{ route('tasks.plans.buckets.destroy', [$plan, $bucket]) }}" data-confirm="Delete this bucket?">
                                     @csrf @method('DELETE')
                                     <button class="hover:text-danger-600">Delete</button>
                                 </form>

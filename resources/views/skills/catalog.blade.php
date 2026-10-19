@@ -6,8 +6,8 @@
             <a href="{{ route('skills.landing') }}" class="text-sm text-neutral-600 hover:underline">&larr; Back to Skills &amp; Competencies</a>
 
             <div class="flex flex-wrap items-center gap-2">
-                <a href="{{ route('skills.catalog.template') }}" class="rounded-md border border-neutral-300 bg-white px-3.5 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50">Download Template</a>
-                <a href="{{ route('skills.catalog.export') }}" class="rounded-md border border-neutral-300 bg-white px-3.5 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50">Export XLSX</a>
+                <x-button variant="secondary" href="{{ route('skills.catalog.template') }}">Download Template</x-button>
+                <x-button variant="secondary" href="{{ route('skills.catalog.export') }}">Export XLSX</x-button>
 
                 @if (auth()->user()->canEditMenu(\App\Enums\MenuKey::SkillsCompetencies))
                     <form method="POST" action="{{ route('skills.catalog.import') }}" enctype="multipart/form-data">

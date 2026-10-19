@@ -4,9 +4,9 @@
     <div class="space-y-4">
         <div class="flex items-center justify-between">
             <p class="text-sm text-neutral-500">{{ $newsItems->total() }} news item(s). Published items appear in the dashboard carousel.</p>
-            <a href="{{ route('news.create') }}" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">
+            <x-button href="{{ route('news.create') }}">
                 Add News
-            </a>
+            </x-button>
         </div>
 
         <div class="max-h-[70vh] overflow-auto rounded-lg border border-neutral-200 bg-white shadow-md">
@@ -57,7 +57,7 @@
                             <td class="px-3 py-2 text-neutral-600">{{ $item->created_at->format('d M Y') }}</td>
                             <td class="px-3 py-2 text-right space-x-2">
                                 <a href="{{ route('news.edit', $item) }}" class="text-neutral-600 hover:underline">Edit</a>
-                                <form action="{{ route('news.destroy', $item) }}" method="POST" class="inline" onsubmit="return confirm('Delete this news item?')">
+                                <form action="{{ route('news.destroy', $item) }}" method="POST" class="inline" data-confirm="Delete this news item?">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-danger-600 hover:underline">Delete</button>

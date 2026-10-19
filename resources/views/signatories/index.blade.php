@@ -5,7 +5,7 @@
         <div class="flex items-center justify-between">
             <p class="text-sm text-neutral-500">Reusable trainer / authorizer names and signature images, used when setting up a Training Program's certificate.</p>
             @can(\App\Enums\PermissionName::ManageCertificates->value)
-                <a href="{{ route('signatories.create') }}" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Add Signatory</a>
+                <x-button href="{{ route('signatories.create') }}">Add Signatory</x-button>
             @endcan
         </div>
 
@@ -49,7 +49,7 @@
                                 @can(\App\Enums\PermissionName::ManageCertificates->value)
                                     <a href="{{ route('signatories.edit', $signatory) }}" class="font-medium text-accent-600 hover:underline">Edit</a>
                                     <form method="POST" action="{{ route('signatories.destroy', $signatory) }}" class="inline"
-                                          onsubmit="return confirm('Delete this signatory? Training programs using it keep their existing signature image.');">
+                                          data-confirm="Delete this signatory? Training programs using it keep their existing signature image.">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="ml-3 text-danger-600 hover:underline">Delete</button>

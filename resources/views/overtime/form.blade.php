@@ -89,9 +89,9 @@ $old = fn ($field, $default = null) => old($field, $isEdit ? ($entry->{$field} i
             </div>
 
             <div class="mt-6 flex items-center gap-3">
-                <button type="submit" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">
+                <x-button type="submit">
                     {{ $isEdit ? 'Save Changes' : 'Log Overtime' }}
-                </button>
+                </x-button>
                 <a href="{{ route('overtime.index') }}" class="text-sm text-neutral-600 hover:underline">Cancel</a>
             </div>
         </form>

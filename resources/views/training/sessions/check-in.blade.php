@@ -17,9 +17,9 @@
 
             <p data-face-status class="mb-4 min-h-[3rem] text-sm font-medium text-neutral-700"></p>
 
-            <button type="button" data-face-start class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">
+            <x-button type="button" data-face-start>
                 Start Check-in
-            </button>
+            </x-button>
         </div>
 
         <div class="text-center">

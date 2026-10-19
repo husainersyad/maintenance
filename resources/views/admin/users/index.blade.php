@@ -9,7 +9,7 @@
                 </p>
                 <p class="mt-1 text-sm text-neutral-500">{{ $users->total() }} user(s) found.</p>
             </div>
-            <a href="{{ route('admin.users.create') }}" class="shrink-0 rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Add User</a>
+            <x-button href="{{ route('admin.users.create') }}" class="shrink-0">Add User</x-button>
         </div>
 
         @php
@@ -45,8 +45,8 @@
                 </select>
 
                 <div class="col-span-1 flex gap-2 sm:col-span-2 lg:col-span-4">
-                    <button type="submit" class="rounded-md bg-brand-600 px-3.5 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Filter</button>
-                    <a href="{{ route('admin.users.index') }}" class="rounded-md border border-neutral-300 px-3.5 py-1.5 text-sm font-medium text-neutral-600 transition shadow-sm hover:border-accent-400 hover:bg-accent-50 hover:text-accent-700">Reset</a>
+                    <x-button size="sm" type="submit">Filter</x-button>
+                    <x-button variant="secondary" size="sm" href="{{ route('admin.users.index') }}">Reset</x-button>
                 </div>
             </form>
         </x-filter-panel>

@@ -43,9 +43,9 @@
 
             <div class="flex gap-2">
                 @can('update', $employee)
-                    <a href="{{ route('employees.edit', array_filter(['employee' => $employee, 'from' => $from])) }}" class="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">Edit</a>
+                    <x-button variant="secondary" href="{{ route('employees.edit', array_filter(['employee' => $employee, 'from' => $from])) }}">Edit</x-button>
                 @endcan
-                <a href="{{ $back['route'] }}" class="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">{{ $back['label'] }}</a>
+                <x-button variant="secondary" href="{{ $back['route'] }}">{{ $back['label'] }}</x-button>
             </div>
         </div>
 
@@ -67,17 +67,15 @@
                                        value="{{ route('onboarding.edit', $employee->profile_completion_token) }}"
                                        class="w-full min-w-0 flex-1 rounded-md border-neutral-300 bg-white text-sm text-neutral-700"
                                        onclick="this.select()">
-                                <button type="button"
-                                        @click="navigator.clipboard.writeText(document.getElementById('onboarding-link-{{ $employee->id }}').value); copied = true; setTimeout(() => copied = false, 2000)"
-                                        class="shrink-0 rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">
+                                <x-button variant="secondary" type="button" @click="navigator.clipboard.writeText(document.getElementById('onboarding-link-{{ $employee->id }}').value); copied = true; setTimeout(() => copied = false, 2000)" class="shrink-0">
                                     <span x-show="!copied">Copy Link</span>
                                     <span x-show="copied" x-cloak>Copied!</span>
-                                </button>
+                                </x-button>
                             </div>
 
                             <p class="mt-2 text-xs text-neutral-500">
                                 Expires {{ $employee->profile_completion_expires_at->format('d M Y') }}.
-                                <form method="POST" action="{{ route('employees.onboarding-link', $employee) }}" class="inline" onsubmit="return confirm('Generate a new link? The current QR code and link will stop working.');">
+                                <form method="POST" action="{{ route('employees.onboarding-link', $employee) }}" class="inline" data-confirm="Generate a new link? The current QR code and link will stop working.">
                                     @csrf
                                     <button type="submit" class="font-medium text-accent-700 hover:underline">Generate new link</button>
                                 </form>
@@ -98,9 +96,9 @@
                         </div>
                         <form method="POST" action="{{ route('employees.onboarding-link', $employee) }}">
                             @csrf
-                            <button type="submit" class="shrink-0 rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">
+                            <x-button type="submit" class="shrink-0">
                                 Generate {{ $employee->profile_completed_at ? 'New' : '' }} Onboarding Link
-                            </button>
+                            </x-button>
                         </form>
                     </div>
                 @endif
@@ -124,13 +122,10 @@
                                    value="{{ route('verify.employee', $employee) }}"
                                    class="w-full min-w-0 flex-1 rounded-md border-neutral-300 bg-white text-sm text-neutral-700"
                                    onclick="this.select()">
-                            <button type="button"
-                                    x-data="{ copied: false }"
-                                    @click="navigator.clipboard.writeText(document.getElementById('verify-link-{{ $employee->id }}').value); copied = true; setTimeout(() => copied = false, 2000)"
-                                    class="shrink-0 rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">
+                            <x-button variant="secondary" type="button" x-data="{ copied: false }" @click="navigator.clipboard.writeText(document.getElementById('verify-link-{{ $employee->id }}').value); copied = true; setTimeout(() => copied = false, 2000)" class="shrink-0">
                                 <span x-show="!copied">Copy Link</span>
                                 <span x-show="copied" x-cloak>Copied!</span>
-                            </button>
+                            </x-button>
                         </div>
                     </div>
                 </div>
@@ -158,7 +153,7 @@
                             </div>
                             @if ($isOwnProfile)
                                 @if ($canQuiz)
-                                    <a href="{{ route('training.quiz.show', $assignment) }}" class="rounded-md bg-brand-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition hover:bg-brand-700">Take Quiz</a>
+                                    <x-button size="xs" href="{{ route('training.quiz.show', $assignment) }}">Take Quiz</x-button>
                                 @elseif ($assignment->quiz_submitted_at)
                                     <a href="{{ route('training.quiz.show', $assignment) }}" class="text-xs font-medium text-accent-700 hover:underline">{{ $assignment->certificate_id ? 'View result & certificate' : 'View result' }}</a>
                                 @else
@@ -238,7 +233,7 @@
                         <p class="text-xs text-neutral-500">{{ $checklistCount }} skill(s) apply to this employee{{ $employee->position ? ' (default from '.$employee->position->title.', adjusted by supervisor)' : '' }}.</p>
                     </div>
                     @can(\App\Enums\PermissionName::AssessCompetencies->value)
-                        <a href="{{ route('employees.skill-checklist.edit', $employee) }}" class="rounded-md border border-neutral-300 bg-white px-3.5 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50">Review checklist</a>
+                        <x-button variant="secondary" href="{{ route('employees.skill-checklist.edit', $employee) }}">Review checklist</x-button>
                     @endcan
                 </div>
 
@@ -262,7 +257,7 @@
                                     <td class="px-3 py-2 text-neutral-600">{{ $assessment->assessedBy?->name ?? '—' }}</td>
                                     <td class="px-3 py-2 text-right">
                                         @can(\App\Enums\PermissionName::AssessCompetencies->value)
-                                            <form method="POST" action="{{ route('employees.skill-assessments.destroy', [$employee, $assessment]) }}" onsubmit="return confirm('Remove this assessment record?');">
+                                            <form method="POST" action="{{ route('employees.skill-assessments.destroy', [$employee, $assessment]) }}" data-confirm="Remove this assessment record?">
                                                 @csrf
                                                 @method('DELETE')
                                                 @if ($from)
@@ -318,7 +313,7 @@
                                 <x-input-label for="remarks" value="Remarks (optional)" />
                                 <textarea id="remarks" name="remarks" rows="2" class="mt-1 block w-full rounded-md border-neutral-300 text-sm"></textarea>
                             </div>
-                            <button type="submit" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Save Assessment</button>
+                            <x-button type="submit">Save Assessment</x-button>
                         </form>
                     </div>
                 @endcan
@@ -390,7 +385,7 @@
                 <div class="flex items-center justify-between">
                     <p class="text-sm text-neutral-500">Total training hours recorded: {{ $employee->trainingRecords->sum('duration_hours') ?: 0 }}</p>
                     @can(\App\Enums\PermissionName::ManageTrainingRecords->value)
-                        <a href="{{ route('employees.training-records.create', array_filter(['employee' => $employee, 'from' => $from])) }}" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Add Training Record</a>
+                        <x-button href="{{ route('employees.training-records.create', array_filter(['employee' => $employee, 'from' => $from])) }}">Add Training Record</x-button>
                     @endcan
                 </div>
 
@@ -416,7 +411,7 @@
                                     <td class="px-3 py-2 text-neutral-600">{{ $record->certificate_issued ? ($record->certificate_reference ?? 'Yes') : '—' }}</td>
                                     <td class="px-3 py-2 text-right">
                                         @can(\App\Enums\PermissionName::ManageTrainingRecords->value)
-                                            <form method="POST" action="{{ route('employees.training-records.destroy', [$employee, $record]) }}" onsubmit="return confirm('Remove this training record?');">
+                                            <form method="POST" action="{{ route('employees.training-records.destroy', [$employee, $record]) }}" data-confirm="Remove this training record?">
                                                 @csrf
                                                 @method('DELETE')
                                                 @if ($from)
@@ -440,7 +435,7 @@
             <div class="space-y-4">
                 @can(\App\Enums\PermissionName::ManageDevelopmentPlans->value)
                     <div class="flex justify-end">
-                        <a href="{{ route('employees.development-plans.create', array_filter(['employee' => $employee, 'from' => $from])) }}" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Add Development Plan</a>
+                        <x-button href="{{ route('employees.development-plans.create', array_filter(['employee' => $employee, 'from' => $from])) }}">Add Development Plan</x-button>
                     </div>
                 @endcan
 
@@ -498,7 +493,7 @@
             <div class="space-y-4">
                 @can(\App\Enums\PermissionName::ManageCertificates->value)
                     <div class="flex justify-end">
-                        <a href="{{ route('employees.certificates.create', array_filter(['employee' => $employee, 'from' => $from])) }}" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Add Certificate</a>
+                        <x-button href="{{ route('employees.certificates.create', array_filter(['employee' => $employee, 'from' => $from])) }}">Add Certificate</x-button>
                     </div>
                 @endcan
 
@@ -527,7 +522,7 @@
                                         @endif
                                         @can(\App\Enums\PermissionName::ManageCertificates->value)
                                             <a href="{{ route('employees.certificates.edit', array_filter(['employee' => $employee, 'certificate' => $certificate, 'from' => $from])) }}" class="text-neutral-600 hover:underline">Edit</a>
-                                            <form method="POST" action="{{ route('employees.certificates.destroy', [$employee, $certificate]) }}" class="inline" onsubmit="return confirm('Remove this certificate?');">
+                                            <form method="POST" action="{{ route('employees.certificates.destroy', [$employee, $certificate]) }}" class="inline" data-confirm="Remove this certificate?">
                                                 @csrf
                                                 @method('DELETE')
                                                 @if ($from)

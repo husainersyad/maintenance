@@ -14,9 +14,9 @@ $statusStyles = [
             <p class="text-sm text-neutral-500">
                 {{ $manage ? 'Overtime across all teams.' : 'Overtime for your team.' }}
             </p>
-            <a href="{{ route('overtime.create') }}" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">
+            <x-button href="{{ route('overtime.create') }}">
                 Log Overtime
-            </a>
+            </x-button>
         </div>
 
         <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -58,8 +58,8 @@ $statusStyles = [
                         <option value="submitted" @selected(($filters['submission'] ?? null) === 'submitted')>Submitted to HR</option>
                     </select>
                     <div class="flex gap-2">
-                        <button type="submit" class="rounded-md bg-brand-600 px-3.5 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Filter</button>
-                        <a href="{{ route('overtime.index') }}" class="rounded-md border border-neutral-300 px-3.5 py-1.5 text-sm font-medium text-neutral-600 transition shadow-sm hover:border-accent-400 hover:bg-accent-50 hover:text-accent-700">Reset</a>
+                        <x-button size="sm" type="submit">Filter</x-button>
+                        <x-button variant="secondary" size="sm" href="{{ route('overtime.index') }}">Reset</x-button>
                     </div>
                 </form>
             </x-filter-panel>
@@ -68,15 +68,12 @@ $statusStyles = [
         <form id="overtime-bulk-form" x-data="{ checkedCount: 0 }">
             @if ($manage)
                 <div class="mb-3 flex items-center gap-3">
-                    <button type="submit" formaction="{{ route('overtime.export') }}" formmethod="GET" formtarget="_blank"
-                            class="rounded-md border border-neutral-300 bg-white px-3.5 py-2 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">
+                    <x-button variant="secondary" type="submit" formaction="{{ route('overtime.export') }}" formmethod="GET" formtarget="_blank">
                         Export Selected (.xlsx)
-                    </button>
-                    <button type="submit" formaction="{{ route('overtime.mark-submitted') }}" formmethod="POST"
-                            onclick="return confirm('Mark the selected entries as submitted to HR?')"
-                            class="rounded-md border border-neutral-300 bg-white px-3.5 py-2 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">
+                    </x-button>
+                    <x-button variant="secondary" type="submit" formaction="{{ route('overtime.mark-submitted') }}" formmethod="POST" data-confirm="Mark the selected entries as submitted to HR?">
                         Mark Selected as Submitted to HR
-                    </button>
+                    </x-button>
                     <span class="text-xs text-neutral-400" x-show="checkedCount > 0" x-cloak x-text="checkedCount + ' selected'"></span>
                     <span class="text-xs text-neutral-400">No selection exports/marks every not-yet-submitted entry.</span>
                 </div>
@@ -159,7 +156,7 @@ $statusStyles = [
                                         <form method="POST" action="{{ route('overtime.request-edit', $entry) }}" class="flex items-start gap-2">
                                             @csrf
                                             <input type="text" name="edit_request_reason" placeholder="Why does this entry need to change?" class="block w-full rounded-md border-neutral-300 text-sm" required>
-                                            <button type="submit" class="shrink-0 rounded-md bg-brand-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-brand-700">Submit Request</button>
+                                            <x-button size="xs" type="submit" class="shrink-0">Submit Request</x-button>
                                         </form>
                                     </td>
                                 </tr>

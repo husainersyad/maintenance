@@ -29,7 +29,7 @@
                             </td>
                             <td class="px-3 py-2 text-neutral-600">{{ $requirement->notes ?? '—' }}</td>
                             <td class="px-3 py-2 text-right">
-                                <form method="POST" action="{{ route('skills.positions.requirements.destroy', [$position, $requirement]) }}" onsubmit="return confirm('Remove this requirement?');">
+                                <form method="POST" action="{{ route('skills.positions.requirements.destroy', [$position, $requirement]) }}" data-confirm="Remove this requirement?">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-danger-600 hover:underline">Remove</button>
@@ -77,7 +77,7 @@
                     <x-input-error :messages="$errors->get('notes')" class="mt-1" />
                 </div>
 
-                <button type="submit" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Add Requirement</button>
+                <x-button type="submit">Add Requirement</x-button>
             </form>
         </div>
     </div>

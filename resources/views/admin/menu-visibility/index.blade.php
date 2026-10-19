@@ -23,8 +23,8 @@
                 @endforeach
             </select>
             <div class="flex gap-2">
-                <button type="submit" class="rounded-md bg-brand-600 px-3.5 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-brand-700">Filter</button>
-                <a href="{{ route('admin.menu-visibility.index') }}" class="rounded-md border border-neutral-300 px-3.5 py-1.5 text-sm font-medium text-neutral-600 shadow-sm hover:bg-neutral-50">Reset</a>
+                <x-button size="sm" type="submit">Filter</x-button>
+                <x-button variant="secondary" size="sm" href="{{ route('admin.menu-visibility.index') }}">Reset</x-button>
             </div>
         </form>
 
@@ -53,10 +53,8 @@
 
                 <h3 class="mt-5 text-sm font-semibold text-neutral-900">2. Pilih user di tabel di bawah, lalu:</h3>
                 <div class="mt-3 flex flex-wrap gap-2">
-                    <button type="submit" name="action" value="hide"
-                            class="rounded-md bg-danger-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-danger-700">Sembunyikan menu terpilih</button>
-                    <button type="submit" name="action" value="show"
-                            class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-700">Tampilkan menu terpilih</button>
+                    <x-button variant="danger" type="submit" name="action" value="hide">Sembunyikan menu terpilih</x-button>
+                    <x-button type="submit" name="action" value="show">Tampilkan menu terpilih</x-button>
                 </div>
             </div>
 

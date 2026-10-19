@@ -6,16 +6,16 @@
             <div class="flex flex-wrap items-center justify-between gap-3 print:hidden">
                 <p class="text-sm text-neutral-500">Certificate verification QR code for each employee - scan or print for a badge. Links to the same public page as the one on an employee's profile.</p>
                 <div class="flex items-center gap-2">
-                    <a href="{{ route('employees.index') }}" class="rounded-md border border-neutral-300 bg-white px-3.5 py-2 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">&larr; Back</a>
-                    <button type="button" onclick="window.print()" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Print This Page</button>
+                    <x-button variant="secondary" href="{{ route('employees.index') }}">&larr; Back</x-button>
+                    <x-button type="button" onclick="window.print()">Print This Page</x-button>
                 </div>
             </div>
 
             <form method="GET" class="flex gap-2 print:hidden">
                 <input type="text" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Search NIK, name, department..." class="w-full max-w-sm rounded-md border-neutral-300 text-sm">
-                <button type="submit" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Search</button>
+                <x-button type="submit">Search</x-button>
                 @if (filled($filters['search'] ?? null))
-                    <a href="{{ route('employees.qr-codes') }}" class="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">Reset</a>
+                    <x-button variant="secondary" href="{{ route('employees.qr-codes') }}">Reset</x-button>
                 @endif
             </form>
 
@@ -34,7 +34,7 @@
                         @method('PUT')
                         <input type="text" id="qr-base-url" name="qr_base_url" value="{{ old('qr_base_url', \App\Models\Setting::get('qr_base_url')) }}" placeholder="https://your-domain.example.com"
                                class="w-full min-w-0 flex-1 rounded-md border-neutral-300 text-sm">
-                        <button type="submit" class="shrink-0 rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">Save</button>
+                        <x-button type="submit" class="shrink-0">Save</x-button>
                     </form>
                     <x-input-error :messages="$errors->get('qr_base_url')" class="mt-1" />
                 @else
@@ -55,11 +55,9 @@
                         <canvas data-qrcode data-qr-path="{{ $path }}" class="h-[160px] w-[160px] rounded-md border border-neutral-200 bg-white"></canvas>
                     </div>
                     <p class="break-all text-[10px] text-neutral-400" data-qr-url-text></p>
-                    <button type="button" data-download-qr data-filename="{{ $employee->employee_number }}"
-                            data-name="{{ $employee->full_name }}" data-nik="{{ $employee->employee_number }}"
-                            class="mt-2 w-full rounded-md border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50 print:hidden">
+                    <x-button variant="secondary" size="xs" type="button" data-download-qr data-filename="{{ $employee->employee_number }}" data-name="{{ $employee->full_name }}" data-nik="{{ $employee->employee_number }}" class="mt-2 w-full print:hidden">
                         Download PNG
-                    </button>
+                    </x-button>
                 </div>
             @empty
                 <div class="col-span-full rounded-lg border border-neutral-200 bg-white p-10 text-center text-neutral-500 shadow-md">No employees found.</div>

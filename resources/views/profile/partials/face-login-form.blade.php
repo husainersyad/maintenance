@@ -17,7 +17,7 @@
         </div>
 
         <form method="POST" action="{{ route('face-login.disable') }}" class="mt-4"
-              onsubmit="return confirm('Disable Face Login on all devices?');">
+              data-confirm="Disable Face Login on all devices?">
             @csrf
             <button type="submit" class="rounded-md border border-danger-300 px-4 py-2 text-sm font-medium text-danger-700 hover:bg-danger-50">
                 Disable Face Login
@@ -28,9 +28,9 @@
             <video data-face-video autoplay muted playsinline class="hidden mb-2 w-full max-w-sm rounded-md bg-black"></video>
             <p data-face-status class="mb-2 text-sm text-neutral-600"></p>
 
-            <button type="button" data-face-start class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">
+            <x-button type="button" data-face-start>
                 Start Camera
-            </button>
+            </x-button>
 
             <div class="mt-3 space-y-3" data-face-enroll-url="{{ route('face-login.enroll') }}">
                 <label class="flex items-start gap-2 text-sm text-neutral-700">
