@@ -275,4 +275,136 @@ class NewsTest extends TestCase
         $response->assertDontSee('Hidden Draft');
         $response->assertDontSee('Hidden Expired');
     }
+
+    private function adminUser(): User
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole(RoleName::Administrator->value);
+
+        return $admin;
+    }
+
+    private function staffUser(): User
+    {
+        $staff = User::factory()->create();
+        $staff->assignRole(RoleName::MaintenanceStaff->value);
+
+        return $staff;
+    }
+
+    public function test_acknowledgement_news_requires_recipients(): void
+    {
+        $this->actingAs($this->adminUser())->post(route('news.store'), [
+            'title' => 'Important', 'body' => '<p>x</p>', 'template' => 'standard',
+            'requires_acknowledgement' => '1',
+        ])->assertSessionHasErrors('recipient_ids');
+    }
+
+    public function test_acknowledgement_news_is_created_with_recipients_and_only_notifies_them(): void
+    {
+        $admin = $this->adminUser();
+        $recipient = $this->staffUser();
+        $other = $this->staffUser();
+
+        $this->actingAs($admin)->post(route('news.store'), [
+            'title' => 'Important', 'body' => '<p>x</p>', 'template' => 'standard',
+            'is_published' => '1', 'requires_acknowledgement' => '1', 'recipient_ids' => [$recipient->id],
+        ])->assertRedirect(route('news.index'));
+
+        $news = News::firstWhere('title', 'Important');
+        $this->assertTrue($news->requires_acknowledgement);
+        $this->assertDatabaseHas('news_acknowledgements', ['news_id' => $news->id, 'user_id' => $recipient->id, 'acknowledged_at' => null]);
+        $this->assertDatabaseMissing('news_acknowledgements', ['news_id' => $news->id, 'user_id' => $other->id]);
+        $this->assertCount(1, $recipient->fresh()->notifications);
+        $this->assertCount(0, $other->fresh()->notifications);
+    }
+
+    public function test_acknowledgement_news_is_hidden_from_non_recipients(): void
+    {
+        $recipient = $this->staffUser();
+        $other = $this->staffUser();
+        $news = News::factory()->create(['title' => 'Secret Notice', 'requires_acknowledgement' => true]);
+        $news->acknowledgements()->create(['user_id' => $recipient->id]);
+
+        $this->actingAs($other)->get(route('news.show', $news))->assertNotFound();
+        $this->actingAs($other)->get(route('dashboard'))->assertDontSee('Secret Notice');
+        $this->actingAs($other)->post(route('news.acknowledge', $news))->assertNotFound();
+
+        $this->actingAs($recipient)->get(route('news.show', $news))->assertOk()->assertSee('I have read and understood');
+        $this->actingAs($recipient)->get(route('dashboard'))->assertSee('Secret Notice');
+    }
+
+    public function test_recipient_can_acknowledge_and_the_time_is_recorded_once(): void
+    {
+        $recipient = $this->staffUser();
+        $news = News::factory()->create(['requires_acknowledgement' => true]);
+        $news->acknowledgements()->create(['user_id' => $recipient->id]);
+
+        $this->travelTo(now()->setTime(9, 30, 15));
+        $this->actingAs($recipient)->post(route('news.acknowledge', $news))->assertRedirect(route('news.show', $news));
+        $first = $news->acknowledgements()->first()->acknowledged_at;
+        $this->assertSame('09:30:15', $first->format('H:i:s'));
+
+        $this->travelTo(now()->addDay());
+        $this->actingAs($recipient)->post(route('news.acknowledge', $news))->assertRedirect();
+        $this->assertTrue($news->acknowledgements()->first()->acknowledged_at->equalTo($first));
+    }
+
+    public function test_manager_sees_who_confirmed_and_who_is_pending(): void
+    {
+        $done = $this->staffUser();
+        $pending = $this->staffUser();
+        $news = News::factory()->create(['requires_acknowledgement' => true]);
+        $news->acknowledgements()->create(['user_id' => $done->id])->forceFill(['acknowledged_at' => now()])->save();
+        $news->acknowledgements()->create(['user_id' => $pending->id]);
+
+        $this->actingAs($this->adminUser())->get(route('news.show', $news))
+            ->assertOk()->assertSee('Confirmations (1 of 2)')->assertSee($done->name)->assertSee($pending->name);
+    }
+
+    public function test_editing_never_removes_a_recipient_who_already_confirmed(): void
+    {
+        $admin = $this->adminUser();
+        $done = $this->staffUser();
+        $pending = $this->staffUser();
+        $added = $this->staffUser();
+        $news = News::factory()->create(['requires_acknowledgement' => true, 'is_published' => true, 'notified_at' => now()]);
+        $news->acknowledgements()->create(['user_id' => $done->id])->forceFill(['acknowledged_at' => now()])->save();
+        $news->acknowledgements()->create(['user_id' => $pending->id]);
+
+        $this->actingAs($admin)->put(route('news.update', $news), [
+            'title' => $news->title, 'body' => '<p>x</p>', 'template' => 'standard',
+            'is_published' => '1', 'recipient_ids' => [$added->id],
+        ])->assertRedirect(route('news.index'));
+
+        $ids = $news->acknowledgements()->pluck('user_id')->all();
+        $this->assertContains($done->id, $ids);
+        $this->assertContains($added->id, $ids);
+        $this->assertNotContains($pending->id, $ids);
+        $this->assertCount(1, $added->fresh()->notifications);
+    }
+
+    public function test_news_type_cannot_be_changed_after_creation(): void
+    {
+        $news = News::factory()->create();
+
+        $this->actingAs($this->adminUser())->put(route('news.update', $news), [
+            'title' => $news->title, 'body' => '<p>x</p>', 'template' => 'standard',
+            'is_published' => '1', 'requires_acknowledgement' => '1', 'recipient_ids' => [$this->staffUser()->id],
+        ])->assertSessionHasErrors('recipient_ids');
+
+        $this->assertFalse($news->fresh()->requires_acknowledgement);
+    }
+
+    public function test_news_form_renders_with_the_recipient_picker(): void
+    {
+        $admin = $this->adminUser();
+        $staff = $this->staffUser();
+        $news = News::factory()->create(['requires_acknowledgement' => true]);
+        $news->acknowledgements()->create(['user_id' => $staff->id]);
+
+        $this->actingAs($admin)->get(route('news.create'))->assertOk()->assertSee('Requires acknowledgement');
+        $this->actingAs($admin)->get(route('news.edit', $news))->assertOk()->assertSee($staff->email);
+        $this->actingAs($admin)->get(route('news.index'))->assertOk()->assertSee('0 of 1 confirmed');
+    }
 }

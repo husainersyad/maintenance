@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class News extends Model
 {
@@ -19,6 +20,7 @@ class News extends Model
         'body',
         'image_path',
         'template',
+        'requires_acknowledgement',
         'is_published',
         'expires_at',
         'created_by',
@@ -28,6 +30,7 @@ class News extends Model
     {
         return [
             'is_published' => 'boolean',
+            'requires_acknowledgement' => 'boolean',
             'expires_at' => 'date',
             'notified_at' => 'datetime',
         ];
@@ -48,6 +51,26 @@ class News extends Model
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function acknowledgements(): HasMany
+    {
+        return $this->hasMany(NewsAcknowledgement::class);
+    }
+
+    /**
+     * What a given user may see: read-only news is for everyone, but news
+     * that needs acknowledgement is only for the people it was addressed to.
+     */
+    public function scopeVisibleTo($query, User $user)
+    {
+        return $query->where(fn ($q) => $q->where('requires_acknowledgement', false)
+            ->orWhereHas('acknowledgements', fn ($a) => $a->where('user_id', $user->id)));
+    }
+
+    public function isAddressedTo(User $user): bool
+    {
+        return $this->acknowledgements()->where('user_id', $user->id)->exists();
     }
 
     /** Published and not past its optional expiry date - what the dashboard carousel shows. */

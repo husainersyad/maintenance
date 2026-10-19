@@ -16,6 +16,7 @@
                         <th class="sticky top-0 z-10 bg-brand-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-brand-700">Image</th>
                         <th class="sticky top-0 z-10 bg-brand-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-brand-700">Title</th>
                         <th class="sticky top-0 z-10 bg-brand-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-brand-700">Template</th>
+                        <th class="sticky top-0 z-10 bg-brand-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-brand-700">Type</th>
                         <th class="sticky top-0 z-10 bg-brand-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-brand-700">Status</th>
                         <th class="sticky top-0 z-10 bg-brand-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-brand-700">Created</th>
                         <th class="sticky top-0 z-10 bg-brand-50 px-3 py-2"></th>
@@ -33,6 +34,14 @@
                             </td>
                             <td class="px-3 py-2 font-medium text-neutral-900">{{ $item->title }}</td>
                             <td class="px-3 py-2 text-neutral-600 capitalize">{{ $item->template }}</td>
+                            <td class="px-3 py-2 text-neutral-600">
+                                @if ($item->requires_acknowledgement)
+                                    <a href="{{ route('news.show', $item) }}" class="font-medium text-brand-700 hover:underline">Acknowledgement</a>
+                                    <span class="block text-xs text-neutral-400">{{ $item->acknowledged_count }} of {{ $item->acknowledgements_count }} confirmed</span>
+                                @else
+                                    Read only
+                                @endif
+                            </td>
                             <td class="px-3 py-2">
                                 @if (!$item->is_published)
                                     <span class="inline-flex rounded-full bg-neutral-100 px-2 py-1 text-xs font-medium text-neutral-500">Draft</span>
@@ -57,7 +66,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-10 text-center text-neutral-500">No news yet.</td>
+                            <td colspan="7" class="px-4 py-10 text-center text-neutral-500">No news yet.</td>
                         </tr>
                     @endforelse
                 </tbody>
