@@ -569,6 +569,66 @@ class EmployeeManagementTest extends TestCase
             ->assertSessionHasErrors('columns.0');
     }
 
+    public function test_import_updates_profile_columns_including_technical_background(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole(RoleName::Administrator->value);
+
+        $employee = Employee::factory()->create(['employee_number' => 'EMP-30020']);
+
+        $file = $this->makeImportFile(
+            ['Employee Number', 'Technical Background', 'Gender', 'Date of Birth', 'Date Joined', 'Email', 'Phone', 'Years of Experience', 'Notes', 'License Number', 'Education', 'Preferred Name'],
+            [['EMP-30020', 'Mechanical, Electrical', 'female', '1990-05-17', '31/01/2020', 'a.b@example.com', '0812', 7, 'Some note', 'LIC-1', 'S1 Teknik', 'Abi']]
+        );
+
+        $this->actingAs($admin)->post(route('employees.import'), ['file' => $file])->assertRedirect(route('employees.index'));
+
+        $employee->refresh();
+        $this->assertSame('Mechanical, Electrical', $employee->technical_background);
+        $this->assertSame('Female', $employee->gender);
+        $this->assertSame('1990-05-17', $employee->date_of_birth->format('Y-m-d'));
+        $this->assertSame('2020-01-31', $employee->date_joined->format('Y-m-d'));
+        $this->assertSame('a.b@example.com', $employee->email);
+        $this->assertSame(7, $employee->years_of_experience);
+        $this->assertSame('LIC-1', $employee->license_number);
+        $this->assertSame('S1 Teknik', $employee->education);
+        $this->assertSame('Abi', $employee->preferred_name);
+        $this->assertSame('Some note', $employee->notes);
+    }
+
+    public function test_import_rejects_invalid_profile_values_without_touching_the_employee(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole(RoleName::Administrator->value);
+
+        Employee::factory()->create(['email' => 'taken@example.com']);
+        $employee = Employee::factory()->create(['employee_number' => 'EMP-30021', 'gender' => null, 'email' => null, 'date_of_birth' => null]);
+
+        $file = $this->makeImportFile(
+            ['Employee Number', 'Gender', 'Date of Birth', 'Email'],
+            [['EMP-30021', 'Other', '31/02/2020', 'taken@example.com']]
+        );
+
+        $response = $this->actingAs($admin)->post(route('employees.import'), ['file' => $file]);
+
+        $response->assertSessionHas('import_errors');
+        $employee->refresh();
+        $this->assertNull($employee->gender);
+        $this->assertNull($employee->date_of_birth);
+        $this->assertNull($employee->email);
+    }
+
+    public function test_export_includes_every_importable_column(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole(RoleName::Administrator->value);
+        Employee::factory()->create(['technical_background' => 'Hydraulics']);
+
+        $response = $this->actingAs($admin)->get(route('employees.index', ['export' => 'xlsx', 'employment_status_id' => '']));
+
+        $response->assertOk();
+    }
+
     public function test_import_reports_an_unmatched_lookup_value_without_crashing(): void
     {
         $admin = User::factory()->create();

@@ -24,6 +24,7 @@ use App\Models\SkillPosition;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx as XlsxReader;
@@ -41,7 +42,59 @@ class EmployeeController extends Controller
         'Employee Number', 'Nomor LOTOTO', 'ID SAP', 'Full Name', 'Business Unit', 'Department', 'Maintenance Team',
         'Position', 'Skill Position', 'Employment Type', 'Employment Source', 'Management',
         'Employment Status', 'Shift', 'Supervisor (Employee Number)',
+        'License Number', 'Preferred Name', 'Gender', 'Date of Birth', 'Email', 'Phone', 'Date Joined',
+        'Education', 'Technical Background', 'Years of Experience', 'Notes',
     ];
+
+    /**
+     * Plain (non-lookup) import columns => [employees column, validation
+     * rules]. Mirrors the rules of the create/edit form so an import can't
+     * store anything the form would reject. Date columns are parsed
+     * separately (see parseImportDate) before the rules run.
+     */
+    private function importFieldRules(?int $ignoreEmployeeId): array
+    {
+        return [
+            'Nomor LOTOTO' => ['lototo_number', ['string', 'max:50']],
+            'ID SAP' => ['sap_id', ['string', 'max:50', Rule::unique('employees', 'sap_id')->ignore($ignoreEmployeeId)]],
+            'License Number' => ['license_number', ['string', 'max:50']],
+            'Preferred Name' => ['preferred_name', ['string', 'max:255']],
+            'Gender' => ['gender', [Rule::in(['Male', 'Female'])]],
+            'Date of Birth' => ['date_of_birth', ['date', 'before:today']],
+            'Email' => ['email', ['email', 'max:255', Rule::unique('employees', 'email')->ignore($ignoreEmployeeId)]],
+            'Phone' => ['phone', ['string', 'max:30']],
+            'Date Joined' => ['date_joined', ['date']],
+            'Education' => ['education', ['string', 'max:255']],
+            'Technical Background' => ['technical_background', ['string', 'max:255']],
+            'Years of Experience' => ['years_of_experience', ['integer', 'min:0', 'max:80']],
+            'Notes' => ['notes', ['string', 'max:2000']],
+        ];
+    }
+
+    /**
+     * Turns a raw spreadsheet date cell (an Excel serial number or text like
+     * 2024-01-31 / 31/01/2024 / 31-01-2024) into Y-m-d, or null when it
+     * can't be read unambiguously. Day-first is assumed for slashed text,
+     * and impossible dates (e.g. 31/02/2024) are rejected, not rolled over.
+     */
+    private function parseImportDate(mixed $value): ?string
+    {
+        if (is_numeric($value) && (float) $value > 1) {
+            return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((float) $value)->format('Y-m-d');
+        }
+
+        $text = trim((string) $value);
+
+        foreach (['Y-m-d', 'd/m/Y', 'd-m-Y'] as $format) {
+            $date = \DateTime::createFromFormat('!'.$format, $text);
+
+            if ($date && $date->format($format) === $text) {
+                return $date->format('Y-m-d');
+            }
+        }
+
+        return null;
+    }
 
     public function index(Request $request): View|\Symfony\Component\HttpFoundation\StreamedResponse
     {
@@ -91,6 +144,17 @@ class EmployeeController extends Controller
                 $e->employmentStatus?->name,
                 $e->shift?->name,
                 $e->supervisor?->employee_number,
+                $e->license_number,
+                $e->preferred_name,
+                $e->gender,
+                $e->date_of_birth?->format('Y-m-d'),
+                $e->email,
+                $e->phone,
+                $e->date_joined?->format('Y-m-d'),
+                $e->education,
+                $e->technical_background,
+                $e->years_of_experience,
+                $e->notes,
             ]);
 
             return $this->streamXlsx('employees-'.now()->format('Y-m-d').'.xlsx', self::IMPORT_COLUMNS, $rows);
@@ -352,11 +416,14 @@ class EmployeeController extends Controller
             ? array_unique(['Employee Number', ...$request->input('columns')])
             : self::IMPORT_COLUMNS;
 
-        $rows = (new XlsxReader)->load($request->file('file')->getRealPath())
-            ->getActiveSheet()
-            ->toArray(null, true, true, false);
+        $sheet = (new XlsxReader)->load($request->file('file')->getRealPath())->getActiveSheet();
+        $rows = $sheet->toArray(null, true, true, false);
+        // Unformatted values, so date cells arrive as serial numbers instead
+        // of text that depends on the cell's display format.
+        $rawRows = $sheet->toArray(null, true, false, false);
 
         $header = array_map(fn ($cell) => trim((string) $cell), array_shift($rows) ?? []);
+        array_shift($rawRows);
 
         $lookups = [
             'Business Unit' => [BusinessUnit::class, 'name', 'business_unit_id'],
@@ -379,6 +446,7 @@ class EmployeeController extends Controller
             $rowNumber = $index + 2; // account for the header row
             $data = array_combine($header, array_slice(array_pad($row, count($header), null), 0, count($header)));
             $data = array_intersect_key($data, array_flip($selectedColumns));
+            $rawData = array_combine($header, array_slice(array_pad($rawRows[$index] ?? [], count($header), null), 0, count($header)));
 
             $employeeNumber = trim((string) ($data['Employee Number'] ?? ''));
 
@@ -445,12 +513,36 @@ class EmployeeController extends Controller
                 $changes['full_name'] = trim((string) $data['Full Name']);
             }
 
-            if (! empty($data['Nomor LOTOTO'])) {
-                $changes['lototo_number'] = trim((string) $data['Nomor LOTOTO']);
-            }
+            foreach ($this->importFieldRules($employee->id) as $column => [$field, $rules]) {
+                $value = trim((string) ($data[$column] ?? ''));
 
-            if (! empty($data['ID SAP'])) {
-                $changes['sap_id'] = trim((string) $data['ID SAP']);
+                if ($value === '') {
+                    continue;
+                }
+
+                if (in_array($field, ['date_of_birth', 'date_joined'], true)) {
+                    $value = $this->parseImportDate($rawData[$column] ?? $value);
+
+                    if ($value === null) {
+                        $errors[] = "Row {$rowNumber}: {$column} \"{$data[$column]}\" is not a valid date (use YYYY-MM-DD or DD/MM/YYYY) - left unchanged.";
+
+                        continue;
+                    }
+                }
+
+                if ($field === 'gender') {
+                    $value = ucfirst(strtolower($value));
+                }
+
+                $validator = Validator::make([$field => $value], [$field => $rules]);
+
+                if ($validator->fails()) {
+                    $errors[] = "Row {$rowNumber}: {$column} - {$validator->errors()->first($field)} - left unchanged.";
+
+                    continue;
+                }
+
+                $changes[$field] = $value;
             }
 
             foreach ($lookups as $column => [$modelClass, $nameField, $foreignKey]) {
