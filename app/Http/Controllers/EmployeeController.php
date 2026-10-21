@@ -24,6 +24,7 @@ use App\Models\SkillPosition;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx as XlsxReader;
 
@@ -123,6 +124,7 @@ class EmployeeController extends Controller
             'supervisors' => Employee::query()->visibleTo($user)->whereHas('directReports')->orderBy('full_name')->get(['id', 'full_name', 'employee_number']),
             'shifts' => Shift::where('is_active', true)->orderBy('name')->get(),
             'filters' => $filters,
+            'importColumns' => array_values(array_filter(self::IMPORT_COLUMNS, fn ($c) => $c !== 'Employee Number')),
         ]);
     }
 
@@ -329,6 +331,10 @@ class EmployeeController extends Controller
      * updated or duplicated). A row whose Employee Number doesn't exist
      * anywhere creates a new employee, provided Full Name is filled in
      * (required to create a valid record).
+     *
+     * The optional "columns" input restricts the import to the chosen
+     * columns - everything else in the file is ignored, so a partial update
+     * (e.g. only Shift) can't touch other fields.
      */
     public function import(Request $request): RedirectResponse
     {
@@ -336,7 +342,15 @@ class EmployeeController extends Controller
 
         $request->validate([
             'file' => ['required', 'file', 'mimes:xlsx'],
+            'columns' => ['nullable', 'array'],
+            'columns.*' => ['string', Rule::in(self::IMPORT_COLUMNS)],
         ]);
+
+        // Only the ticked columns are applied; Employee Number is always
+        // used to match the row. No selection at all means every column.
+        $selectedColumns = $request->filled('columns')
+            ? array_unique(['Employee Number', ...$request->input('columns')])
+            : self::IMPORT_COLUMNS;
 
         $rows = (new XlsxReader)->load($request->file('file')->getRealPath())
             ->getActiveSheet()
@@ -363,7 +377,8 @@ class EmployeeController extends Controller
 
         foreach ($rows as $index => $row) {
             $rowNumber = $index + 2; // account for the header row
-            $data = array_combine($header, array_pad($row, count($header), null));
+            $data = array_combine($header, array_slice(array_pad($row, count($header), null), 0, count($header)));
+            $data = array_intersect_key($data, array_flip($selectedColumns));
 
             $employeeNumber = trim((string) ($data['Employee Number'] ?? ''));
 
@@ -415,7 +430,7 @@ class EmployeeController extends Controller
                 $fullName = trim((string) ($data['Full Name'] ?? ''));
 
                 if ($fullName === '') {
-                    $errors[] = "Row {$rowNumber}: employee \"{$employeeNumber}\" doesn't exist yet and Full Name is required to create it - row skipped.";
+                    $errors[] = "Row {$rowNumber}: employee \"{$employeeNumber}\" doesn't exist yet and Full Name is required to create it (make sure the Full Name column is selected and filled) - row skipped.";
 
                     continue;
                 }

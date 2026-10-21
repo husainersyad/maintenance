@@ -17,16 +17,12 @@
                         Export XLSX
                     </x-button>
 
-                    <form method="POST" action="{{ route('employees.import') }}" enctype="multipart/form-data">
-                        @csrf
-                        <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-neutral-300 bg-white px-3.5 py-2 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-4.5L12 16.5m0 0 4.5-4.5M12 16.5V3" />
-                            </svg>
-                            Import XLSX
-                            <input type="file" name="file" accept=".xlsx" class="hidden" onchange="this.form.requestSubmit()">
-                        </label>
-                    </form>
+                    <x-button variant="secondary" type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'import-employees')">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-4.5L12 16.5m0 0 4.5-4.5M12 16.5V3" />
+                        </svg>
+                        Import XLSX
+                    </x-button>
 
                     <div class="h-6 w-px bg-neutral-200"></div>
 
@@ -188,4 +184,50 @@
 
         {{ $employees->links() }}
     </div>
+    @can('create', \App\Models\Employee::class)
+        <x-modal name="import-employees" maxWidth="lg">
+            <form method="POST" action="{{ route('employees.import') }}" enctype="multipart/form-data"
+                  x-data="{ selected: @js($importColumns), all: @js($importColumns) }" class="space-y-4 p-6">
+                @csrf
+                <div>
+                    <h2 class="text-base font-semibold text-neutral-900">Import Employees</h2>
+                    <p class="mt-1 text-sm text-neutral-500">
+                        Pilih kolom yang ingin ditambahkan / diperbarui. Kolom lain di file akan diabaikan.
+                        Employee Number selalu dipakai untuk mencocokkan data. Sel kosong tidak mengubah data.
+                        Untuk menambah karyawan baru, kolom Full Name harus dipilih.
+                    </p>
+                </div>
+
+                <div>
+                    <div class="mb-2 flex items-center justify-between">
+                        <span class="text-sm font-medium text-neutral-700">Kolom yang diimport</span>
+                        <span class="flex gap-3 text-xs">
+                            <button type="button" class="text-brand-600 hover:underline" x-on:click="selected = [...all]">Pilih semua</button>
+                            <button type="button" class="text-brand-600 hover:underline" x-on:click="selected = []">Kosongkan</button>
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                        @foreach ($importColumns as $column)
+                            <label class="flex items-center gap-2 text-sm text-neutral-700">
+                                <input type="checkbox" name="columns[]" value="{{ $column }}" x-model="selected"
+                                       class="rounded border-neutral-300 text-brand-600 focus:ring-brand-500">
+                                {{ $column }}
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div>
+                    <label for="import-file" class="mb-1 block text-sm font-medium text-neutral-700">File .xlsx</label>
+                    <input id="import-file" type="file" name="file" accept=".xlsx" required
+                           class="block w-full text-sm text-neutral-700 file:mr-3 file:rounded-md file:border-0 file:bg-neutral-100 file:px-3 file:py-2 file:text-sm file:font-medium hover:file:bg-neutral-200">
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <x-button variant="secondary" type="button" x-on:click="$dispatch('close-modal', 'import-employees')">Batal</x-button>
+                    <x-button type="submit" x-bind:disabled="selected.length === 0">Import</x-button>
+                </div>
+            </form>
+        </x-modal>
+    @endcan
 </x-app-layout>

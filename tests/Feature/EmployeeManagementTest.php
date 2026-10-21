@@ -522,6 +522,53 @@ class EmployeeManagementTest extends TestCase
         $this->assertSame('BC', $employee->workforce_category);
     }
 
+    public function test_import_only_applies_the_selected_columns(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole(RoleName::Administrator->value);
+
+        $employee = Employee::factory()->create(['employee_number' => 'EMP-30010', 'full_name' => 'Original Name', 'sap_id' => 'OLD-SAP']);
+
+        $file = $this->makeImportFile(
+            ['Employee Number', 'Full Name', 'ID SAP'],
+            [['EMP-30010', 'Changed Name', 'NEW-SAP']]
+        );
+
+        $this->actingAs($admin)->post(route('employees.import'), ['file' => $file, 'columns' => ['ID SAP']])
+            ->assertRedirect(route('employees.index'));
+
+        $employee->refresh();
+        $this->assertSame('NEW-SAP', $employee->sap_id);
+        $this->assertSame('Original Name', $employee->full_name);
+    }
+
+    public function test_import_cannot_create_an_employee_when_full_name_is_not_selected(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole(RoleName::Administrator->value);
+
+        $file = $this->makeImportFile(
+            ['Employee Number', 'Full Name', 'ID SAP'],
+            [['EMP-30011', 'Someone New', 'SAP-1']]
+        );
+
+        $response = $this->actingAs($admin)->post(route('employees.import'), ['file' => $file, 'columns' => ['ID SAP']]);
+
+        $response->assertSessionHas('import_errors');
+        $this->assertDatabaseMissing('employees', ['employee_number' => 'EMP-30011']);
+    }
+
+    public function test_import_rejects_an_unknown_column_selection(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole(RoleName::Administrator->value);
+
+        $file = $this->makeImportFile(['Employee Number'], [['EMP-30012']]);
+
+        $this->actingAs($admin)->post(route('employees.import'), ['file' => $file, 'columns' => ['password']])
+            ->assertSessionHasErrors('columns.0');
+    }
+
     public function test_import_reports_an_unmatched_lookup_value_without_crashing(): void
     {
         $admin = User::factory()->create();
