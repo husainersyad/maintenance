@@ -10,6 +10,7 @@ $children = $childrenByParent->get($employee->id, collect());
 $isSupervisor = str_contains(strtolower((string) $employee->position?->title), 'supervisor');
 $stackChildren = $children->isNotEmpty() && $children->every(fn ($child) => $child->workforce_category === 'BC');
 $forceExpand ??= false;
+$teamTrades ??= collect();
 $highlightIds ??= collect();
 $startOpen = $forceExpand || ! $isSupervisor;
 $isMatch = $highlightIds->contains($employee->id);
@@ -41,6 +42,8 @@ $href = match (true) {
     auth()->user()->can('managePlantManager', \App\Models\Employee::class) => route('plant-manager.edit'),
     default => null,
 };
+$trade = $isBlueCollar ? $employee->technicalTrade() : null;
+$team = $teamTrades->get($employee->id);
 $tag = $href ? 'a' : 'div';
 $photoRingClass = $isBlueCollar || $isIntern ? 'ring-2 ring-white/70' : 'ring-2 ring-neutral-100';
 @endphp
@@ -64,6 +67,13 @@ $photoRingClass = $isBlueCollar || $isIntern ? 'ring-2 ring-white/70' : 'ring-2 
         <span class="text-sm font-semibold leading-tight">{{ $employee->full_name }}</span>
         <span class="text-xs {{ $mutedTextClass }}">{{ $employee->employee_number }}</span>
         <span class="text-xs {{ $mutedTextClass }}">{{ $employee->skillPosition?->name ?? '—' }}</span>
+        @if ($trade)
+            <span class="rounded bg-white/90 px-2 py-0.5 text-xs font-bold text-accent-800"
+                  title="{{ $trade === 'M' ? 'Mechanic' : 'Electric' }}">{{ $trade }}</span>
+        @endif
+        @if ($team)
+            <span class="text-xs font-medium {{ $mutedTextClass }}" title="Blue Collar direct reports">Team: M {{ $team['M'] }} · E {{ $team['E'] }}</span>
+        @endif
     </{{ $tag }}>
 
     @if ($children->isNotEmpty())
@@ -79,7 +89,7 @@ $photoRingClass = $isBlueCollar || $isIntern ? 'ring-2 ring-white/70' : 'ring-2 
 
         <ul x-show="open" x-cloak @class(['org-chart-stack' => $stackChildren])>
             @foreach ($children as $child)
-                @include('organization-chart._node', ['employee' => $child, 'childrenByParent' => $childrenByParent, 'highlightIds' => $highlightIds, 'forceExpand' => $forceExpand])
+                @include('organization-chart._node', ['employee' => $child, 'childrenByParent' => $childrenByParent, 'highlightIds' => $highlightIds, 'forceExpand' => $forceExpand, 'teamTrades' => $teamTrades])
             @endforeach
         </ul>
     @endif

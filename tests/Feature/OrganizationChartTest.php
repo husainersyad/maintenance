@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\RoleName;
+use App\Models\BusinessUnit;
 use App\Models\Department;
 use App\Models\Employee;
 use App\Models\EmploymentStatus;
@@ -134,10 +135,85 @@ class OrganizationChartTest extends TestCase
         Employee::factory()->count(2)->create(['employment_status_id' => $this->active->id, 'department_id' => $maintenance->id, 'workforce_category' => 'BC', 'supervisor_id' => null]);
         Employee::factory()->create(['employment_status_id' => $this->active->id, 'department_id' => $other->id, 'workforce_category' => 'BC', 'supervisor_id' => null, 'full_name' => 'Other Dept Person']);
 
-        $response = $this->actingAs($admin)->get(route('organization-chart.index', ['department_id' => $maintenance->id]));
+        $response = $this->actingAs($admin)->get(route('organization-chart.index', ['applied' => 1, 'department_id' => [$maintenance->id]]));
 
         $response->assertOk();
         $response->assertViewHas('workforceCounts', fn ($counts) => $counts->get('BC') === 2);
         $response->assertDontSee('Other Dept Person');
+    }
+
+    public function test_blue_collar_nodes_show_their_trade_and_supervisors_show_team_trade_counts(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole(RoleName::Administrator->value);
+
+        $supervisor = Employee::factory()->create(['employment_status_id' => $this->active->id, 'workforce_category' => 'WCM', 'supervisor_id' => null]);
+        foreach (['MECHANIC', 'Mechanical', 'ELECTRIC', 'Instrumentation', null] as $background) {
+            Employee::factory()->create([
+                'employment_status_id' => $this->active->id,
+                'workforce_category' => 'BC',
+                'supervisor_id' => $supervisor->id,
+                'technical_background' => $background,
+            ]);
+        }
+
+        $response = $this->actingAs($admin)->get(route('organization-chart.index'));
+
+        $response->assertOk();
+        $response->assertViewHas('teamTrades', fn ($trades) => $trades->get($supervisor->id) === ['M' => 2, 'E' => 1]);
+        $response->assertSee('Team: M 2 · E 1', false);
+    }
+
+    public function test_first_visit_defaults_to_tire_cord_and_half_product_in_maintenance(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole(RoleName::Administrator->value);
+
+        $tireCord = BusinessUnit::factory()->create(['name' => 'TIRE CORD', 'is_active' => true]);
+        $halfProduct = BusinessUnit::factory()->create(['name' => 'HALF PRODUCT', 'is_active' => true]);
+        $building = BusinessUnit::factory()->create(['name' => 'BUILDING PRODUCT', 'is_active' => true]);
+        $maintenance = Department::factory()->create(['name' => 'MAINTENANCE', 'is_active' => true]);
+        $utility = Department::factory()->create(['name' => 'UTILITY', 'is_active' => true]);
+
+        $base = ['employment_status_id' => $this->active->id, 'supervisor_id' => null];
+        Employee::factory()->create($base + ['full_name' => 'Tire Maint', 'business_unit_id' => $tireCord->id, 'department_id' => $maintenance->id]);
+        Employee::factory()->create($base + ['full_name' => 'Half Maint', 'business_unit_id' => $halfProduct->id, 'department_id' => $maintenance->id]);
+        Employee::factory()->create($base + ['full_name' => 'Building Maint', 'business_unit_id' => $building->id, 'department_id' => $maintenance->id]);
+        Employee::factory()->create($base + ['full_name' => 'Tire Utility', 'business_unit_id' => $tireCord->id, 'department_id' => $utility->id]);
+
+        $response = $this->actingAs($admin)->get(route('organization-chart.index'));
+
+        $response->assertOk();
+        $response->assertSee('Tire Maint');
+        $response->assertSee('Half Maint');
+        $response->assertDontSee('Building Maint');
+        $response->assertDontSee('Tire Utility');
+
+        // Submitting the form with nothing ticked means "all", not "defaults".
+        $all = $this->actingAs($admin)->get(route('organization-chart.index', ['applied' => 1]));
+        $all->assertSee('Building Maint');
+        $all->assertSee('Tire Utility');
+    }
+
+    public function test_business_unit_and_department_filters_accept_multiple_values(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole(RoleName::Administrator->value);
+
+        $first = Department::factory()->create(['is_active' => true]);
+        $second = Department::factory()->create(['is_active' => true]);
+        $third = Department::factory()->create(['is_active' => true]);
+
+        $base = ['employment_status_id' => $this->active->id, 'supervisor_id' => null];
+        Employee::factory()->create($base + ['full_name' => 'In First', 'department_id' => $first->id]);
+        Employee::factory()->create($base + ['full_name' => 'In Second', 'department_id' => $second->id]);
+        Employee::factory()->create($base + ['full_name' => 'In Third', 'department_id' => $third->id]);
+
+        $response = $this->actingAs($admin)->get(route('organization-chart.index', ['applied' => 1, 'department_id' => [$first->id, $second->id]]));
+
+        $response->assertOk();
+        $response->assertSee('In First');
+        $response->assertSee('In Second');
+        $response->assertDontSee('In Third');
     }
 }

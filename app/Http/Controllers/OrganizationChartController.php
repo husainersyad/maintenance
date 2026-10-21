@@ -32,6 +32,11 @@ use Illuminate\View\View;
  */
 class OrganizationChartController extends Controller
 {
+    /** Scope shown on a first visit; matched case-insensitively by name. */
+    private const DEFAULT_BUSINESS_UNITS = ['Tire Cord', 'Half Product'];
+
+    private const DEFAULT_DEPARTMENTS = ['Maintenance'];
+
     public function index(Request $request): View
     {
         $this->authorize('viewAny', Employee::class);
@@ -55,11 +60,38 @@ class OrganizationChartController extends Controller
             $employees = $employees->concat($this->ancestorChain($user->employee))->unique('id');
         }
 
-        $filters = $request->only(['search', 'business_unit_id', 'department_id']);
-        $search = trim((string) ($filters['search'] ?? ''));
-        $businessUnitId = $filters['business_unit_id'] ?? null;
-        $departmentId = $filters['department_id'] ?? null;
-        $filtered = filled($search) || filled($businessUnitId) || filled($departmentId);
+        // Mechanic/electric headcount of each supervisor's Blue Collar direct
+        // reports, taken before any search/filter narrows the tree so the
+        // numbers describe the real team rather than just the matches.
+        $teamTrades = $employees
+            ->where('workforce_category', 'BC')
+            ->groupBy('supervisor_id')
+            ->map(fn (Collection $team) => [
+                'M' => $team->filter(fn (Employee $employee) => $employee->technicalTrade() === 'M')->count(),
+                'E' => $team->filter(fn (Employee $employee) => $employee->technicalTrade() === 'E')->count(),
+            ]);
+
+        $businessUnits = BusinessUnit::where('is_active', true)->orderBy('name')->get();
+        $departments = Department::where('is_active', true)->orderBy('name')->get();
+
+        // The form always posts `applied`, so an explicit "all" (nothing
+        // ticked) can be told apart from a first visit, which gets the
+        // default scope instead. Reset returns to that default.
+        $applied = $request->boolean('applied');
+        $businessUnitIds = $applied
+            ? $this->idList($request->input('business_unit_id'))
+            : $this->defaultIds($businessUnits, self::DEFAULT_BUSINESS_UNITS);
+        $departmentIds = $applied
+            ? $this->idList($request->input('department_id'))
+            : $this->defaultIds($departments, self::DEFAULT_DEPARTMENTS);
+
+        $search = trim((string) $request->input('search', ''));
+        $filters = [
+            'search' => $search,
+            'business_unit_id' => $businessUnitIds,
+            'department_id' => $departmentIds,
+        ];
+        $filtered = filled($search) || $businessUnitIds !== [] || $departmentIds !== [];
         $highlightIds = collect();
         $legendSource = $employees;
 
@@ -69,11 +101,14 @@ class OrganizationChartController extends Controller
                     fn (Employee $employee) => str_contains(strtolower($employee->full_name), strtolower($search))
                         || str_contains(strtolower((string) $employee->employee_number), strtolower($search))
                 ))
-                ->when(filled($businessUnitId), fn (Collection $collection) => $collection->where('business_unit_id', $businessUnitId))
-                ->when(filled($departmentId), fn (Collection $collection) => $collection->where('department_id', $departmentId));
+                ->when($businessUnitIds !== [], fn (Collection $collection) => $collection->whereIn('business_unit_id', $businessUnitIds))
+                ->when($departmentIds !== [], fn (Collection $collection) => $collection->whereIn('department_id', $departmentIds));
 
+            // Only a name/NIK search singles people out; a business unit or
+            // department scope matches whole groups, where highlighting
+            // everyone would just be noise.
+            $highlightIds = filled($search) ? $matches->pluck('id') : collect();
             $legendSource = $matches;
-            $highlightIds = $matches->pluck('id');
 
             // Narrow the tree down to just the matched employee(s) plus
             // their reporting line up to the top, instead of the whole
@@ -104,10 +139,12 @@ class OrganizationChartController extends Controller
             'filters' => $filters,
             'filtered' => $filtered,
             'highlightIds' => $highlightIds,
+            'teamTrades' => $teamTrades,
             'workforceCounts' => $legendSource->countBy('workforce_category'),
-            'matchCount' => $filtered ? $highlightIds->count() : null,
-            'businessUnits' => BusinessUnit::where('is_active', true)->orderBy('name')->get(),
-            'departments' => Department::where('is_active', true)->orderBy('name')->get(),
+            'searching' => filled($search),
+            'matchCount' => $filtered ? $legendSource->count() : null,
+            'businessUnits' => $businessUnits,
+            'departments' => $departments,
         ]);
     }
 
@@ -146,5 +183,35 @@ class OrganizationChartController extends Controller
         return Employee::withoutGlobalScope(ExcludePlantManagerScope::class)
             ->with(['skillPosition', 'position'])
             ->find($employee->supervisor_id);
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function idList(mixed $value): array
+    {
+        return collect(is_array($value) ? $value : [$value])
+            ->filter(fn ($id) => is_numeric($id))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param  Collection<int, \Illuminate\Database\Eloquent\Model>  $options
+     * @param  list<string>  $names
+     * @return list<int>
+     */
+    private function defaultIds(Collection $options, array $names): array
+    {
+        $names = array_map('strtolower', $names);
+
+        return $options
+            ->filter(fn ($option) => in_array(strtolower($option->name), $names, true))
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
     }
 }

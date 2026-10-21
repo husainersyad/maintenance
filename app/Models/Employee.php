@@ -63,6 +63,23 @@ class Employee extends Model
      * The Plant Manager record (null if none is set up yet), the one employee
      * every other query hides - see ExcludePlantManagerScope.
      */
+    /**
+     * Trade letter derived from the free-text technical_background: M for
+     * mechanic, E for electric, null for anything else (instrumentation,
+     * blank, ...). Matched by prefix since the data mixes "MECHANIC" and
+     * "Mechanical", "ELECTRIC" and "Electrical".
+     */
+    public function technicalTrade(): ?string
+    {
+        $background = strtolower(trim((string) $this->technical_background));
+
+        return match (true) {
+            str_starts_with($background, 'mech') => 'M',
+            str_starts_with($background, 'elec') => 'E',
+            default => null,
+        };
+    }
+
     public static function plantManager(): ?self
     {
         return static::withoutGlobalScope(ExcludePlantManagerScope::class)

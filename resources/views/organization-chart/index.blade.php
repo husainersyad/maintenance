@@ -80,19 +80,13 @@
                 <input type="text" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Search name or NIK..."
                        class="rounded-md text-sm py-1.5 transition focus:border-brand-500 focus:ring-brand-500 sm:col-span-2 {{ filled($filters['search'] ?? null) ? $activeFieldClass : $defaultFieldClass }}" />
 
-                <select name="business_unit_id" class="rounded-md text-sm py-1.5 transition focus:border-brand-500 focus:ring-brand-500 {{ filled($filters['business_unit_id'] ?? null) ? $activeFieldClass : $defaultFieldClass }}">
-                    <option value="">All Business Units</option>
-                    @foreach ($businessUnits as $businessUnit)
-                        <option value="{{ $businessUnit->id }}" @selected(($filters['business_unit_id'] ?? null) == $businessUnit->id)>{{ $businessUnit->name }}</option>
-                    @endforeach
-                </select>
+                <input type="hidden" name="applied" value="1" />
 
-                <select name="department_id" class="rounded-md text-sm py-1.5 transition focus:border-brand-500 focus:ring-brand-500 {{ filled($filters['department_id'] ?? null) ? $activeFieldClass : $defaultFieldClass }}">
-                    <option value="">All Departments</option>
-                    @foreach ($departments as $department)
-                        <option value="{{ $department->id }}" @selected(($filters['department_id'] ?? null) == $department->id)>{{ $department->name }}</option>
-                    @endforeach
-                </select>
+                <x-multi-select-filter name="business_unit_id" label="All Business Units"
+                                       :options="$businessUnits->pluck('name', 'id')" :selected="$filters['business_unit_id']" />
+
+                <x-multi-select-filter name="department_id" label="All Departments"
+                                       :options="$departments->pluck('name', 'id')" :selected="$filters['department_id']" />
 
                 <div class="flex gap-2">
                     <x-button size="sm" type="submit">Filter</x-button>
@@ -118,6 +112,10 @@
                 Internship (Non BC/WCM)
                 <span class="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-700">{{ $workforceCounts->get('INTERN', 0) }}</span>
             </span>
+            <span class="inline-flex items-center gap-2 text-neutral-600">
+                <span class="font-semibold">M</span> Mechanic
+                <span class="font-semibold">E</span> Electric
+            </span>
             @if ($filtered)
                 <span class="inline-flex items-center gap-2 rounded-full bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700">
                     <span class="h-2 w-2 rounded-full bg-brand-500"></span>
@@ -142,7 +140,7 @@
             <div class="org-chart-canvas overflow-x-auto rounded-lg border border-neutral-300 p-8 shadow-sm">
                 <ul class="org-chart-tree">
                     @foreach ($roots as $root)
-                        @include('organization-chart._node', ['employee' => $root, 'childrenByParent' => $childrenByParent, 'highlightIds' => $highlightIds, 'forceExpand' => $filtered])
+                        @include('organization-chart._node', ['employee' => $root, 'childrenByParent' => $childrenByParent, 'highlightIds' => $highlightIds, 'forceExpand' => $searching, 'teamTrades' => $teamTrades])
                     @endforeach
                 </ul>
             </div>
