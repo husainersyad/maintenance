@@ -6,6 +6,7 @@ use App\Enums\RoleName;
 use App\Models\BusinessUnit;
 use App\Models\Department;
 use App\Models\Employee;
+use App\Models\EmploymentType;
 use App\Models\EmploymentStatus;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
@@ -215,5 +216,30 @@ class OrganizationChartTest extends TestCase
         $response->assertSee('In First');
         $response->assertSee('In Second');
         $response->assertDontSee('In Third');
+    }
+
+    public function test_employment_type_defaults_to_contract_and_permanent_and_can_be_changed(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole(RoleName::Administrator->value);
+
+        $permanent = EmploymentType::factory()->create(['name' => 'Permanent', 'is_active' => true]);
+        $contract = EmploymentType::factory()->create(['name' => 'Contract', 'is_active' => true]);
+        $outsourced = EmploymentType::factory()->create(['name' => 'Outsourced', 'is_active' => true]);
+
+        $base = ['employment_status_id' => $this->active->id, 'supervisor_id' => null];
+        Employee::factory()->create($base + ['full_name' => 'Perm Person', 'employment_type_id' => $permanent->id]);
+        Employee::factory()->create($base + ['full_name' => 'Contract Person', 'employment_type_id' => $contract->id]);
+        Employee::factory()->create($base + ['full_name' => 'Outsourced Person', 'employment_type_id' => $outsourced->id]);
+
+        $default = $this->actingAs($admin)->get(route('organization-chart.index'));
+        $default->assertSee('Perm Person');
+        $default->assertSee('Contract Person');
+        $default->assertDontSee('Outsourced Person');
+
+        $picked = $this->actingAs($admin)->get(route('organization-chart.index', ['applied' => 1, 'employment_type_id' => [$outsourced->id, $contract->id]]));
+        $picked->assertSee('Outsourced Person');
+        $picked->assertSee('Contract Person');
+        $picked->assertDontSee('Perm Person');
     }
 }

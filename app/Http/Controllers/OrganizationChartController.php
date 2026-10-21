@@ -6,6 +6,7 @@ use App\Enums\PermissionName;
 use App\Models\BusinessUnit;
 use App\Models\Department;
 use App\Models\Employee;
+use App\Models\EmploymentType;
 use App\Models\Scopes\ExcludePlantManagerScope;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -36,6 +37,8 @@ class OrganizationChartController extends Controller
     private const DEFAULT_BUSINESS_UNITS = ['Tire Cord', 'Half Product'];
 
     private const DEFAULT_DEPARTMENTS = ['Maintenance'];
+
+    private const DEFAULT_EMPLOYMENT_TYPES = ['Contract', 'Permanent'];
 
     public function index(Request $request): View
     {
@@ -74,6 +77,8 @@ class OrganizationChartController extends Controller
         $businessUnits = BusinessUnit::where('is_active', true)->orderBy('name')->get();
         $departments = Department::where('is_active', true)->orderBy('name')->get();
 
+        $employmentTypes = EmploymentType::where('is_active', true)->orderBy('name')->get();
+
         // The form always posts `applied`, so an explicit "all" (nothing
         // ticked) can be told apart from a first visit, which gets the
         // default scope instead. Reset returns to that default.
@@ -84,14 +89,19 @@ class OrganizationChartController extends Controller
         $departmentIds = $applied
             ? $this->idList($request->input('department_id'))
             : $this->defaultIds($departments, self::DEFAULT_DEPARTMENTS);
+        $employmentTypeIds = $applied
+            ? $this->idList($request->input('employment_type_id'))
+            : $this->defaultIds($employmentTypes, self::DEFAULT_EMPLOYMENT_TYPES);
 
         $search = trim((string) $request->input('search', ''));
         $filters = [
             'search' => $search,
             'business_unit_id' => $businessUnitIds,
             'department_id' => $departmentIds,
+            'employment_type_id' => $employmentTypeIds,
         ];
-        $filtered = filled($search) || $businessUnitIds !== [] || $departmentIds !== [];
+        $filtered = filled($search) || $businessUnitIds !== [] || $departmentIds !== []
+            || $employmentTypeIds !== [];
         $highlightIds = collect();
         $legendSource = $employees;
 
@@ -102,7 +112,8 @@ class OrganizationChartController extends Controller
                         || str_contains(strtolower((string) $employee->employee_number), strtolower($search))
                 ))
                 ->when($businessUnitIds !== [], fn (Collection $collection) => $collection->whereIn('business_unit_id', $businessUnitIds))
-                ->when($departmentIds !== [], fn (Collection $collection) => $collection->whereIn('department_id', $departmentIds));
+                ->when($departmentIds !== [], fn (Collection $collection) => $collection->whereIn('department_id', $departmentIds))
+                ->when($employmentTypeIds !== [], fn (Collection $collection) => $collection->whereIn('employment_type_id', $employmentTypeIds));
 
             // Only a name/NIK search singles people out; a business unit or
             // department scope matches whole groups, where highlighting
@@ -145,6 +156,7 @@ class OrganizationChartController extends Controller
             'matchCount' => $filtered ? $legendSource->count() : null,
             'businessUnits' => $businessUnits,
             'departments' => $departments,
+            'employmentTypes' => $employmentTypes,
         ]);
     }
 

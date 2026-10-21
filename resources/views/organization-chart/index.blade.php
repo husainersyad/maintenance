@@ -76,7 +76,7 @@
 
     <div class="space-y-4">
         <x-filter-panel :active-count="$filterActiveCount">
-            <form method="GET" action="{{ route('organization-chart.index') }}" class="grid grid-cols-1 gap-2.5 rounded-lg border border-neutral-200 bg-white p-3 shadow-sm sm:grid-cols-2 lg:grid-cols-5">
+            <form method="GET" action="{{ route('organization-chart.index') }}" class="grid grid-cols-1 gap-2.5 rounded-lg border border-neutral-200 bg-white p-3 shadow-sm sm:grid-cols-2 lg:grid-cols-6">
                 <input type="text" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Search name or NIK..."
                        class="rounded-md text-sm py-1.5 transition focus:border-brand-500 focus:ring-brand-500 sm:col-span-2 {{ filled($filters['search'] ?? null) ? $activeFieldClass : $defaultFieldClass }}" />
 
@@ -87,6 +87,9 @@
 
                 <x-multi-select-filter name="department_id" label="All Departments"
                                        :options="$departments->pluck('name', 'id')" :selected="$filters['department_id']" />
+
+                <x-multi-select-filter name="employment_type_id" label="All Employment Types"
+                                       :options="$employmentTypes->pluck('name', 'id')" :selected="$filters['employment_type_id']" />
 
                 <div class="flex gap-2">
                     <x-button size="sm" type="submit">Filter</x-button>
