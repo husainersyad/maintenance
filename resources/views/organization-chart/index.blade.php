@@ -76,7 +76,7 @@
 
     <div class="space-y-4">
         <x-filter-panel :active-count="$filterActiveCount">
-            <form method="GET" action="{{ route('organization-chart.index') }}" class="grid grid-cols-1 gap-2.5 rounded-lg border border-neutral-200 bg-white p-3 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
+            <form method="GET" action="{{ route('organization-chart.index') }}" class="grid grid-cols-1 gap-2.5 rounded-lg border border-neutral-200 bg-white p-3 shadow-sm sm:grid-cols-2 lg:grid-cols-5">
                 <input type="text" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Search name or NIK..."
                        class="rounded-md text-sm py-1.5 transition focus:border-brand-500 focus:ring-brand-500 sm:col-span-2 {{ filled($filters['search'] ?? null) ? $activeFieldClass : $defaultFieldClass }}" />
 
@@ -84,6 +84,13 @@
                     <option value="">All Business Units</option>
                     @foreach ($businessUnits as $businessUnit)
                         <option value="{{ $businessUnit->id }}" @selected(($filters['business_unit_id'] ?? null) == $businessUnit->id)>{{ $businessUnit->name }}</option>
+                    @endforeach
+                </select>
+
+                <select name="department_id" class="rounded-md text-sm py-1.5 transition focus:border-brand-500 focus:ring-brand-500 {{ filled($filters['department_id'] ?? null) ? $activeFieldClass : $defaultFieldClass }}">
+                    <option value="">All Departments</option>
+                    @foreach ($departments as $department)
+                        <option value="{{ $department->id }}" @selected(($filters['department_id'] ?? null) == $department->id)>{{ $department->name }}</option>
                     @endforeach
                 </select>
 
@@ -99,14 +106,17 @@
             <span class="inline-flex items-center gap-2">
                 <span class="h-4 w-4 rounded border border-accent-700 bg-accent-600"></span>
                 Blue Collar (BC)
+                <span class="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-700">{{ $workforceCounts->get('BC', 0) }}</span>
             </span>
             <span class="inline-flex items-center gap-2">
                 <span class="h-4 w-4 rounded border border-neutral-400 bg-white"></span>
                 White Collar Management (WCM)
+                <span class="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-700">{{ $workforceCounts->get('WCM', 0) }}</span>
             </span>
             <span class="inline-flex items-center gap-2">
                 <span class="h-4 w-4 rounded border border-pink-700 bg-pink-500"></span>
                 Internship (Non BC/WCM)
+                <span class="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-700">{{ $workforceCounts->get('INTERN', 0) }}</span>
             </span>
             @if ($filtered)
                 <span class="inline-flex items-center gap-2 rounded-full bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700">

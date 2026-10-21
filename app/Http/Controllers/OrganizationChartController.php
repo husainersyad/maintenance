@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\PermissionName;
 use App\Models\BusinessUnit;
+use App\Models\Department;
 use App\Models\Employee;
 use App\Models\Scopes\ExcludePlantManagerScope;
 use Illuminate\Http\Request;
@@ -54,11 +55,13 @@ class OrganizationChartController extends Controller
             $employees = $employees->concat($this->ancestorChain($user->employee))->unique('id');
         }
 
-        $filters = $request->only(['search', 'business_unit_id']);
+        $filters = $request->only(['search', 'business_unit_id', 'department_id']);
         $search = trim((string) ($filters['search'] ?? ''));
         $businessUnitId = $filters['business_unit_id'] ?? null;
-        $filtered = filled($search) || filled($businessUnitId);
+        $departmentId = $filters['department_id'] ?? null;
+        $filtered = filled($search) || filled($businessUnitId) || filled($departmentId);
         $highlightIds = collect();
+        $legendSource = $employees;
 
         if ($filtered) {
             $matches = $employees
@@ -66,8 +69,10 @@ class OrganizationChartController extends Controller
                     fn (Employee $employee) => str_contains(strtolower($employee->full_name), strtolower($search))
                         || str_contains(strtolower((string) $employee->employee_number), strtolower($search))
                 ))
-                ->when(filled($businessUnitId), fn (Collection $collection) => $collection->where('business_unit_id', $businessUnitId));
+                ->when(filled($businessUnitId), fn (Collection $collection) => $collection->where('business_unit_id', $businessUnitId))
+                ->when(filled($departmentId), fn (Collection $collection) => $collection->where('department_id', $departmentId));
 
+            $legendSource = $matches;
             $highlightIds = $matches->pluck('id');
 
             // Narrow the tree down to just the matched employee(s) plus
@@ -99,8 +104,10 @@ class OrganizationChartController extends Controller
             'filters' => $filters,
             'filtered' => $filtered,
             'highlightIds' => $highlightIds,
+            'workforceCounts' => $legendSource->countBy('workforce_category'),
             'matchCount' => $filtered ? $highlightIds->count() : null,
             'businessUnits' => BusinessUnit::where('is_active', true)->orderBy('name')->get(),
+            'departments' => Department::where('is_active', true)->orderBy('name')->get(),
         ]);
     }
 

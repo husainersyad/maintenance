@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\RoleName;
+use App\Models\Department;
 use App\Models\Employee;
 use App\Models\EmploymentStatus;
 use App\Models\User;
@@ -106,5 +107,37 @@ class OrganizationChartTest extends TestCase
 
         $this->assertStringContainsString('bg-accent-600', substr($content, $blueNodeStart, $bluePos - $blueNodeStart));
         $this->assertStringContainsString('bg-white', substr($content, $whiteNodeStart, $whitePos - $whiteNodeStart));
+    }
+
+    public function test_legend_shows_workforce_totals_for_the_whole_chart(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole(RoleName::Administrator->value);
+
+        Employee::factory()->count(3)->create(['employment_status_id' => $this->active->id, 'workforce_category' => 'BC']);
+        Employee::factory()->count(2)->create(['employment_status_id' => $this->active->id, 'workforce_category' => 'WCM']);
+
+        $response = $this->actingAs($admin)->get(route('organization-chart.index'));
+
+        $response->assertOk();
+        $response->assertViewHas('workforceCounts', fn ($counts) => $counts->get('BC') === 3 && $counts->get('WCM') === 2);
+    }
+
+    public function test_department_filter_narrows_the_chart_and_the_legend_totals(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole(RoleName::Administrator->value);
+
+        $maintenance = Department::factory()->create(['is_active' => true]);
+        $other = Department::factory()->create(['is_active' => true]);
+
+        Employee::factory()->count(2)->create(['employment_status_id' => $this->active->id, 'department_id' => $maintenance->id, 'workforce_category' => 'BC', 'supervisor_id' => null]);
+        Employee::factory()->create(['employment_status_id' => $this->active->id, 'department_id' => $other->id, 'workforce_category' => 'BC', 'supervisor_id' => null, 'full_name' => 'Other Dept Person']);
+
+        $response = $this->actingAs($admin)->get(route('organization-chart.index', ['department_id' => $maintenance->id]));
+
+        $response->assertOk();
+        $response->assertViewHas('workforceCounts', fn ($counts) => $counts->get('BC') === 2);
+        $response->assertDontSee('Other Dept Person');
     }
 }
