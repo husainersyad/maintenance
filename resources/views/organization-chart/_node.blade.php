@@ -20,7 +20,7 @@ $isMatch = $highlightIds->contains($employee->id);
 $cardClass = match (true) {
     $isBlueCollar => 'border-accent-700 bg-accent-600 text-white',
     $isIntern => 'border-pink-700 bg-pink-500 text-white',
-    default => 'border-neutral-200 bg-white text-neutral-900',
+    default => 'border-neutral-300 bg-white text-neutral-900',
 };
 $avatarClass = match (true) {
     $isBlueCollar => 'bg-accent-800 text-white',
@@ -40,7 +40,7 @@ $photoRingClass = $isBlueCollar || $isIntern ? 'ring-2 ring-white/70' : 'ring-2 
     <a href="{{ route('employees.show', ['employee' => $employee, 'from' => 'org-chart']) }}"
        class="org-chart-node inline-flex w-48 flex-col items-center gap-1 rounded-lg border p-3 text-center shadow-sm transition hover:shadow-md
               {{ $cardClass }}
-              {{ $isMatch ? 'ring-4 ring-brand-400 ring-offset-2 ring-offset-neutral-100' : '' }}">
+              {{ $isMatch ? 'ring-4 ring-brand-400 ring-offset-2 ring-offset-neutral-200' : '' }}">
         @if ($employee->photo_path)
             <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($employee->photo_path) }}"
                  alt="{{ $employee->full_name }}"

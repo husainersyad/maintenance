@@ -26,16 +26,16 @@
             position: absolute;
             top: 0;
             right: 50%;
-            border-top: 2px solid #cbd5e1;
+            border-top: 2px solid #999087;
             width: 50%;
             height: 24px;
         }
-        .org-chart-tree li::after { right: auto; left: 50%; border-left: 2px solid #cbd5e1; }
+        .org-chart-tree li::after { right: auto; left: 50%; border-left: 2px solid #999087; }
         .org-chart-tree li:only-child::before, .org-chart-tree li:only-child::after { display: none; }
         .org-chart-tree li:only-child { padding-top: 0; }
         .org-chart-tree li:first-child::before { border: 0 none; }
         .org-chart-tree li:last-child::after { border: 0 none; }
-        .org-chart-tree li:last-child::before { border-right: 2px solid #cbd5e1; border-radius: 0 6px 0 0; }
+        .org-chart-tree li:last-child::before { border-right: 2px solid #999087; border-radius: 0 6px 0 0; }
         .org-chart-tree li:first-child::after { border-radius: 6px 0 0 0; }
         .org-chart-tree > li { padding-top: 0; }
         .org-chart-tree > li::before, .org-chart-tree > li::after { display: none; }
@@ -55,9 +55,16 @@
             position: absolute;
             top: 0;
             left: 50%;
-            border-left: 2px solid #cbd5e1;
+            border-left: 2px solid #999087;
             width: 0;
             height: 24px;
+        }
+        /* Warm-gray canvas with a faint dot grid so white (WCM) cards stand
+           out instead of blending into a white background. */
+        .org-chart-canvas {
+            background-color: #EBE9E5;
+            background-image: radial-gradient(#D7D2CB 1.2px, transparent 1.2px);
+            background-size: 18px 18px;
         }
     </style>
 
@@ -94,7 +101,7 @@
                 Blue Collar (BC)
             </span>
             <span class="inline-flex items-center gap-2">
-                <span class="h-4 w-4 rounded border border-neutral-300 bg-white"></span>
+                <span class="h-4 w-4 rounded border border-neutral-400 bg-white"></span>
                 White Collar Management (WCM)
             </span>
             <span class="inline-flex items-center gap-2">
@@ -122,7 +129,7 @@
                 @endif
             </div>
         @else
-            <div class="overflow-x-auto rounded-lg border border-neutral-200 bg-white shadow-md p-8 shadow-md">
+            <div class="org-chart-canvas overflow-x-auto rounded-lg border border-neutral-300 p-8 shadow-sm">
                 <ul class="org-chart-tree">
                     @foreach ($roots as $root)
                         @include('organization-chart._node', ['employee' => $root, 'childrenByParent' => $childrenByParent, 'highlightIds' => $highlightIds, 'forceExpand' => $filtered])
