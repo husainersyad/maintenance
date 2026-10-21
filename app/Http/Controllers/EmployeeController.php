@@ -15,6 +15,7 @@ use App\Models\EmploymentSource;
 use App\Models\EmploymentStatus;
 use App\Models\EmploymentType;
 use App\Models\MaintenanceTeam;
+use App\Models\Scopes\ExcludePlantManagerScope;
 use App\Models\Position;
 use App\Models\Shift;
 use App\Models\Setting;
@@ -405,7 +406,7 @@ class EmployeeController extends Controller
                 // Supervisor importing a number from another team) -
                 // reported the same as "not found", never silently
                 // updated or duplicated with a conflicting number.
-                if (Employee::withTrashed()->where('employee_number', $employeeNumber)->exists()) {
+                if (Employee::withTrashed()->withoutGlobalScope(ExcludePlantManagerScope::class)->where('employee_number', $employeeNumber)->exists()) {
                     $errors[] = "Row {$rowNumber}: employee \"{$employeeNumber}\" not found.";
 
                     continue;
@@ -444,7 +445,11 @@ class EmployeeController extends Controller
                     continue;
                 }
 
-                $match = $modelClass::where($nameField, $value)->first();
+                // Plant Manager is managed only from its own menu, so it can't
+                // be handed out to a regular employee through the import.
+                $match = $modelClass === SkillPosition::class && $value === SkillPosition::PLANT_MANAGER
+                    ? null
+                    : $modelClass::where($nameField, $value)->first();
 
                 if (! $match) {
                     $errors[] = "Row {$rowNumber}: {$column} \"{$value}\" not found - left unchanged.";
@@ -520,7 +525,7 @@ class EmployeeController extends Controller
             'businessUnits' => BusinessUnit::where('is_active', true)->orderBy('name')->get(),
             'maintenanceTeams' => MaintenanceTeam::where('is_active', true)->orderBy('name')->get(),
             'positions' => Position::where('is_active', true)->orderBy('title')->get(),
-            'skillPositions' => SkillPosition::where('is_active', true)->orderBy('name')->get(),
+            'skillPositions' => SkillPosition::where('is_active', true)->where('name', '!=', SkillPosition::PLANT_MANAGER)->orderBy('name')->get(),
             'employmentTypes' => EmploymentType::where('is_active', true)->orderBy('name')->get(),
             'employmentSources' => EmploymentSource::where('is_active', true)->orderBy('name')->get(),
             'workforceCategories' => Employee::WORKFORCE_CATEGORIES,

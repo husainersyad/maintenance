@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Concerns\Auditable;
 use App\Enums\PermissionName;
 use App\Enums\RoleName;
+use App\Models\Scopes\ExcludePlantManagerScope;
 use Database\Factories\EmployeeFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -52,6 +53,23 @@ class Employee extends Model
         'preferred_name', 'photo_path', 'gender', 'date_of_birth', 'email', 'phone',
         'education', 'technical_background', 'years_of_experience',
     ];
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new ExcludePlantManagerScope);
+    }
+
+    /**
+     * The Plant Manager record (null if none is set up yet), the one employee
+     * every other query hides - see ExcludePlantManagerScope.
+     */
+    public static function plantManager(): ?self
+    {
+        return static::withoutGlobalScope(ExcludePlantManagerScope::class)
+            ->whereIn('skill_position_id', SkillPosition::plantManagerIds())
+            ->orderBy('id')
+            ->first();
+    }
 
     protected function casts(): array
     {

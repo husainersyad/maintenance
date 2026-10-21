@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Enums\PermissionName;
 use App\Models\Employee;
+use App\Models\SkillPosition;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -31,7 +32,7 @@ class StoreEmployeeRequest extends FormRequest
             'business_unit_id' => ['nullable', 'exists:business_units,id'],
             'maintenance_team_id' => ['nullable', 'exists:maintenance_teams,id'],
             'position_id' => ['nullable', 'exists:positions,id'],
-            'skill_position_id' => ['nullable', 'exists:skill_positions,id'],
+            'skill_position_id' => ['nullable', Rule::exists('skill_positions', 'id')->where(fn ($q) => $q->where('name', '!=', SkillPosition::PLANT_MANAGER))],
             'employment_type_id' => ['nullable', 'exists:employment_types,id'],
             'employment_source_id' => ['nullable', 'exists:employment_sources,id'],
             'workforce_category' => ['nullable', Rule::in(array_keys(Employee::WORKFORCE_CATEGORIES))],

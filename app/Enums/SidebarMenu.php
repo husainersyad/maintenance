@@ -17,6 +17,7 @@ enum SidebarMenu: string
     case Employees = 'employees';
     case OrganizationChart = 'organization-chart';
     case QrCodes = 'qr-codes';
+    case PlantManager = 'plant-manager';
     case Organization = 'organization';
     case Overtime = 'overtime';
     case JobDescriptions = 'job-descriptions';
@@ -42,6 +43,7 @@ enum SidebarMenu: string
             self::Employees => 'Employees',
             self::OrganizationChart => 'Organization Chart',
             self::QrCodes => 'QR Codes',
+            self::PlantManager => 'Plant Manager',
             self::Organization => 'Organization',
             self::Overtime => 'Overtime',
             self::JobDescriptions => 'Job Descriptions',
@@ -65,7 +67,7 @@ enum SidebarMenu: string
     {
         return match ($this) {
             self::Tasks, self::ShiftComm => 'Task',
-            self::Employees, self::OrganizationChart, self::QrCodes, self::Organization, self::Overtime => 'People & Organization',
+            self::Employees, self::OrganizationChart, self::QrCodes, self::PlantManager, self::Organization, self::Overtime => 'People & Organization',
             self::JobDescriptions, self::Skills, self::SkillMatrix, self::CompetencyGap => 'Competency',
             self::TrainingManagement, self::TrainingCalendar, self::TrainingRecords, self::Certificates,
             self::Recertification, self::Signatories, self::DevelopmentPlans => 'Training & Development',
@@ -90,6 +92,7 @@ enum SidebarMenu: string
                 'employees.update', 'employees.destroy', 'employees.bulk-destroy', 'employees.import'],
             self::OrganizationChart => ['organization-chart.*'],
             self::QrCodes => ['employees.qr-codes'],
+            self::PlantManager => ['plant-manager.*'],
             self::Organization => ['organization.*'],
             self::Overtime => ['overtime.*'],
             self::JobDescriptions => ['job-descriptions.*'],

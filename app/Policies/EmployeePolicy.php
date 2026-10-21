@@ -50,4 +50,17 @@ class EmployeePolicy
     {
         return $this->update($user, $employee);
     }
+
+    /**
+     * The Plant Manager is hidden from every employee screen (see
+     * ExcludePlantManagerScope), so the dedicated Plant Manager menu has its
+     * own check: the same rights as editing employees, plus the ability to see
+     * everyone - never granted just because someone supervises a team.
+     */
+    public function managePlantManager(User $user): bool
+    {
+        return $user->checkPermissionTo(PermissionName::ManageEmployees->value)
+            && $user->checkPermissionTo(PermissionName::ViewAllEmployees->value)
+            && $user->canEditMenu(MenuKey::Employees);
+    }
 }

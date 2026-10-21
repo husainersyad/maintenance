@@ -19,6 +19,7 @@ use App\Http\Controllers\MenuVisibilityController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrganizationChartController;
+use App\Http\Controllers\PlantManagerController;
 use App\Http\Controllers\OvertimeController;
 use App\Http\Controllers\PositionDefaultSkillController;
 use App\Http\Controllers\PositionSkillRequirementController;
@@ -80,6 +81,11 @@ Route::middleware(['auth', 'verified'])->prefix('overtime')->name('overtime.')->
     Route::post('/{overtimeEntry}/request-edit', [OvertimeController::class, 'requestEdit'])->name('request-edit');
     Route::post('/{overtimeEntry}/approve-edit', [OvertimeController::class, 'approveEdit'])->name('approve-edit');
     Route::post('/{overtimeEntry}/reject-edit', [OvertimeController::class, 'rejectEdit'])->name('reject-edit');
+});
+
+Route::middleware(['auth', 'verified'])->prefix('plant-manager')->name('plant-manager.')->group(function () {
+    Route::get('/', [PlantManagerController::class, 'edit'])->name('edit');
+    Route::put('/', [PlantManagerController::class, 'update'])->middleware('menu.edit:'.MenuKey::Employees->value)->name('update');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

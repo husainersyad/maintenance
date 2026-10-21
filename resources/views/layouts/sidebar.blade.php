@@ -5,6 +5,7 @@ $dashboardActive = request()->routeIs('dashboard');
 $employeesActive = request()->routeIs('employees.*');
 $organizationChartActive = request()->routeIs('organization-chart.*');
 $qrCodesActive = request()->routeIs('employees.qr-codes');
+$plantManagerActive = request()->routeIs('plant-manager.*');
 $organizationActive = request()->routeIs('organization.*');
 $overtimeActive = request()->routeIs('overtime.*');
 $skillsActive = request()->routeIs('skills.*');
@@ -53,6 +54,7 @@ $showShiftComm = ! $isGuest && $visible(\App\Enums\SidebarMenu::ShiftComm);
 $showEmployees = $canViewEmployees && $visible(\App\Enums\SidebarMenu::Employees);
 $showOrgChart = $canViewEmployees && $visible(\App\Enums\SidebarMenu::OrganizationChart);
 $showQrCodes = $canViewEmployees && $visible(\App\Enums\SidebarMenu::QrCodes);
+$showPlantManager = $user->can('managePlantManager', \App\Models\Employee::class) && $visible(\App\Enums\SidebarMenu::PlantManager);
 $showOrganization = $canManageMasterData && $visible(\App\Enums\SidebarMenu::Organization);
 $showOvertime = $canViewOvertime && $visible(\App\Enums\SidebarMenu::Overtime);
 $showJobDescriptions = $canViewJobDescriptions && $visible(\App\Enums\SidebarMenu::JobDescriptions);
@@ -73,7 +75,7 @@ $showNews = $canManageNews && $visible(\App\Enums\SidebarMenu::News);
 // Section headings only render when at least one item beneath them would -
 // an empty "Insights & System" heading with nothing under it is just noise
 // for roles (e.g. Maintenance Staff) that hold none of those permissions.
-$showOrganizationSection = $showEmployees || $showOrgChart || $showQrCodes || $showOrganization || $showOvertime;
+$showOrganizationSection = $showEmployees || $showOrgChart || $showQrCodes || $showPlantManager || $showOrganization || $showOvertime;
 $showCompetencySection = $showJobDescriptions || $showSkills || $showSkillMatrix || $showCompetencyGap;
 $showTrainingSection = $showTrainingManagement || $showTrainingCalendar || $showTrainingRecords || $showCertificates || $showRecertification || $showSignatories || $showDevelopmentPlans;
 $showSafetySection = $showLototo;
@@ -81,7 +83,7 @@ $showInsightsSection = $showReports || $canManageUsers || $canManageSettings || 
 
 // Each collapsible group starts open automatically when the current page
 // lives inside it, so navigating there never hides where you are.
-$organizationSectionActive = $employeesActive || $organizationChartActive || $qrCodesActive || $organizationActive || $overtimeActive;
+$organizationSectionActive = $employeesActive || $organizationChartActive || $qrCodesActive || $plantManagerActive || $organizationActive || $overtimeActive;
 $competencySectionActive = $jobDescriptionsActive || $skillsActive || $skillMatrixActive || $competencyGapActive;
 $trainingSectionActive = $trainingManagementActive || $trainingCalendarActive || $trainingRecordsActive
     || $certificatesActive || $recertificationActive || $signatoriesActive || $developmentPlansActive;
@@ -166,6 +168,11 @@ $mobile = $mobile ?? false;
                     @if ($showQrCodes)
 <x-nav-item :href="route('employees.qr-codes')" :active="$qrCodesActive" icon="M3.75 4.5h5.25v5.25H3.75V4.5zM3.75 14.25h5.25v5.25H3.75v-5.25zM14.25 4.5h5.25v5.25h-5.25V4.5zM14.25 14.25h1.5v1.5h-1.5v-1.5zM18 14.25h1.5v1.5H18v-1.5zM14.25 18h1.5v1.5h-1.5V18zM18 18h1.5v1.5H18V18z">
                         QR Codes
+                    </x-nav-item>
+@endif
+                    @if ($showPlantManager)
+<x-nav-item :href="route('plant-manager.edit')" :active="$plantManagerActive" icon="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z">
+                        Plant Manager
                     </x-nav-item>
 @endif
                 @if ($showOrganization)
