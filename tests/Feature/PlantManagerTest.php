@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\RoleName;
 use App\Models\Employee;
+use App\Models\EmploymentStatus;
 use App\Models\SkillPosition;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
@@ -129,5 +130,61 @@ class PlantManagerTest extends TestCase
         $this->actingAs($admin)->get(route('employees.create'))
             ->assertOk()
             ->assertViewHas('skillPositions', fn ($positions) => $positions->doesntContain('name', SkillPosition::PLANT_MANAGER));
+    }
+
+    private function activeStatusId(): int
+    {
+        return EmploymentStatus::factory()->create(['code' => 'ACTIVE', 'counts_as_active' => true])->id;
+    }
+
+    public function test_plant_manager_heads_the_organization_chart_above_the_top_leader(): void
+    {
+        $active = $this->activeStatusId();
+        $this->plantManager->update(['employment_status_id' => $active]);
+        $leader = Employee::factory()->create([
+            'employment_status_id' => $active, 'full_name' => 'Top Leader', 'supervisor_id' => $this->plantManager->id,
+        ]);
+        $admin = $this->userWithRole(RoleName::Administrator);
+
+        $response = $this->actingAs($admin)->get(route('organization-chart.index'));
+
+        $response->assertOk()
+            ->assertViewHas('roots', fn ($roots) => $roots->count() === 1 && $roots->first()->id === $this->plantManager->id)
+            ->assertViewHas('childrenByParent', fn ($children) => $children->get($this->plantManager->id)->pluck('id')->all() === [$leader->id])
+            ->assertSee('Plant Boss')
+            ->assertSee(route('plant-manager.edit'), false)
+            ->assertDontSee(route('employees.show', $this->plantManager->id), false);
+    }
+
+    public function test_a_supervisor_sees_the_plant_manager_on_their_reporting_line_without_a_link(): void
+    {
+        $active = $this->activeStatusId();
+        $supervisorUser = $this->userWithRole(RoleName::MaintenanceSupervisor);
+        $supervisor = Employee::factory()->create([
+            'employment_status_id' => $active, 'user_id' => $supervisorUser->id, 'supervisor_id' => $this->plantManager->id,
+        ]);
+        Employee::factory()->create(['employment_status_id' => $active, 'supervisor_id' => $supervisor->id, 'full_name' => 'Direct Report']);
+
+        $response = $this->actingAs($supervisorUser)->get(route('organization-chart.index'));
+
+        $response->assertOk()
+            ->assertViewHas('roots', fn ($roots) => $roots->count() === 1 && $roots->first()->id === $this->plantManager->id)
+            ->assertSee('Plant Boss')
+            ->assertSee('Direct Report')
+            ->assertDontSee(route('plant-manager.edit'), false);
+    }
+
+    public function test_searching_the_organization_chart_keeps_the_plant_manager_at_the_top(): void
+    {
+        $active = $this->activeStatusId();
+        $leader = Employee::factory()->create(['employment_status_id' => $active, 'full_name' => 'Findable Person', 'supervisor_id' => $this->plantManager->id]);
+        Employee::factory()->create(['employment_status_id' => $active, 'full_name' => 'Someone Else']);
+        $admin = $this->userWithRole(RoleName::Administrator);
+
+        $this->actingAs($admin)->get(route('organization-chart.index', ['search' => 'Findable']))
+            ->assertOk()
+            ->assertViewHas('roots', fn ($roots) => $roots->pluck('id')->all() === [$this->plantManager->id])
+            ->assertSee('Findable Person')
+            ->assertDontSee('Someone Else');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\PermissionName;
 use App\Models\BusinessUnit;
 use App\Models\Employee;
+use App\Models\Scopes\ExcludePlantManagerScope;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -22,6 +23,11 @@ use Illuminate\View\View;
  * and unhelpful for placing themselves in it. So their upward supervisor
  * chain (to the top) is added on top of the scoped set, without pulling in
  * any of their supervisors' other reports (siblings/unrelated branches).
+ *
+ * The Plant Manager is hidden from every other employee screen (see
+ * ExcludePlantManagerScope) but is the head of this chart, so it opts back
+ * in here: added for org-wide viewers, and reached through the ancestor
+ * chain for everyone else.
  */
 class OrganizationChartController extends Controller
 {
@@ -38,7 +44,13 @@ class OrganizationChartController extends Controller
             ->orderBy('full_name')
             ->get();
 
-        if (! $user->hasPermissionTo(PermissionName::ViewAllEmployees->value)) {
+        if ($user->hasPermissionTo(PermissionName::ViewAllEmployees->value)) {
+            $plantManager = Employee::plantManager()?->load(['skillPosition', 'position']);
+
+            if ($plantManager) {
+                $employees = $employees->prepend($plantManager);
+            }
+        } else {
             $employees = $employees->concat($this->ancestorChain($user->employee))->unique('id');
         }
 
@@ -102,15 +114,30 @@ class OrganizationChartController extends Controller
     private function ancestorChain(?Employee $employee): \Illuminate\Support\Collection
     {
         $ancestors = collect();
-        $current = $employee?->supervisor;
+        $current = $this->supervisorOf($employee);
         $hops = 0;
 
         while ($current !== null && $hops < 20) {
             $ancestors->push($current);
-            $current = $current->supervisor;
+            $current = $this->supervisorOf($current);
             $hops++;
         }
 
         return $ancestors;
+    }
+
+    /**
+     * The employee's supervisor, Plant Manager included (the plain
+     * supervisor relation can't see them, as it goes through the global scope).
+     */
+    private function supervisorOf(?Employee $employee): ?Employee
+    {
+        if (! $employee?->supervisor_id) {
+            return null;
+        }
+
+        return Employee::withoutGlobalScope(ExcludePlantManagerScope::class)
+            ->with(['skillPosition', 'position'])
+            ->find($employee->supervisor_id);
     }
 }

@@ -32,12 +32,22 @@ $mutedTextClass = match (true) {
     $isIntern => 'text-pink-100',
     default => 'text-neutral-500',
 };
+// The Plant Manager has no employee profile (hidden from the Employees
+// module), so their card links to the Plant Manager menu - or isn't a link
+// at all for viewers who can't open it.
+$isPlantManager = $employee->skillPosition?->name === \App\Models\SkillPosition::PLANT_MANAGER;
+$href = match (true) {
+    ! $isPlantManager => route('employees.show', ['employee' => $employee, 'from' => 'org-chart']),
+    auth()->user()->can('managePlantManager', \App\Models\Employee::class) => route('plant-manager.edit'),
+    default => null,
+};
+$tag = $href ? 'a' : 'div';
 $photoRingClass = $isBlueCollar || $isIntern ? 'ring-2 ring-white/70' : 'ring-2 ring-neutral-100';
 @endphp
 
 <li x-data="{ open: {{ $startOpen ? 'true' : 'false' }} }"
     @org-expand-all.window="open = true" @org-collapse-all.window="open = {{ $isSupervisor ? 'false' : 'true' }}">
-    <a href="{{ route('employees.show', ['employee' => $employee, 'from' => 'org-chart']) }}"
+    <{{ $tag }} @if ($href) href="{{ $href }}" @endif
        class="org-chart-node inline-flex w-48 flex-col items-center gap-1 rounded-lg border p-3 text-center shadow-sm transition hover:shadow-md
               {{ $cardClass }}
               {{ $isMatch ? 'ring-4 ring-brand-400 ring-offset-2 ring-offset-neutral-200' : '' }}">
@@ -54,7 +64,7 @@ $photoRingClass = $isBlueCollar || $isIntern ? 'ring-2 ring-white/70' : 'ring-2 
         <span class="text-sm font-semibold leading-tight">{{ $employee->full_name }}</span>
         <span class="text-xs {{ $mutedTextClass }}">{{ $employee->employee_number }}</span>
         <span class="text-xs {{ $mutedTextClass }}">{{ $employee->skillPosition?->name ?? '—' }}</span>
-    </a>
+    </{{ $tag }}>
 
     @if ($children->isNotEmpty())
         <button type="button" @click="open = ! open"
