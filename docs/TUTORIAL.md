@@ -78,6 +78,7 @@ Klik lonceng untuk melihat notifikasi, lalu klik salah satu untuk langsung menuj
 
 | Role | Cakupan data karyawan | Garis besar kemampuan |
 |---|---|---|
+| 2026-10-22 | Shift Comm: banner WARNING mesin bermasalah berulang kini bisa di-expand/collapse (default tertutup). |
 | **Administrator** | Semua | Semua fitur, termasuk User Management, Roles, Settings, Audit Log |
 | **People Development** (HR) | Semua | Melihat seluruh karyawan; mengelola training, sertifikat, dll. sesuai izin |
 | **Maintenance Manager** | Diri sendiri + bawahan langsung | Mengelola job description, skill, training, development plan, safety, melihat laporan |
@@ -125,6 +126,7 @@ Catatan komunikasi antar-shift (serah terima).
 2. Pilih **tim**, **tanggal**, dan **shift**. Tanggal dan shift menjadi bagian dari ID entri sehingga **tidak bisa diubah** setelah dibuat.
 3. Isi status dan catatan, lalu simpan.
 4. Entri dapat dibuka, diedit, atau dihapus sesuai hak Anda.
+5. Bila ada mesin dengan problem berulang, banner kuning **WARNING** muncul di atas halaman. Banner ini **tertutup secara default** (hanya menampilkan jumlah mesin); klik banner untuk membuka/menutup rincian per mesin.
 
 ---
 
