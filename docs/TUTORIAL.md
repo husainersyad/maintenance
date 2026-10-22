@@ -2,6 +2,7 @@
 
 Panduan ini untuk pengguna aplikasi internal Departemen Maintenance PT Bekaert Indonesia. Menu yang tampil di sidebar bisa berbeda-beda antar pengguna, tergantung **role** dan pengaturan dari Administrator.
 
+<!-- hide-in-app:start -->
 > **Catatan untuk developer:** dokumen ini harus selalu diperbarui bersama setiap perubahan aplikasi (fitur baru, menu, field, alur, atau perilaku yang berubah). Aturannya ada di [CLAUDE.md](../CLAUDE.md). Catat perubahan di bagian [Riwayat Pembaruan](#riwayat-pembaruan) di bawah.
 
 ## Daftar Isi
@@ -19,6 +20,8 @@ Panduan ini untuk pengguna aplikasi internal Departemen Maintenance PT Bekaert I
 11. [Panduan Administrator](#11-panduan-administrator)
 12. [Tanya Jawab & Masalah Umum](#12-tanya-jawab--masalah-umum)
 13. [Riwayat Pembaruan](#riwayat-pembaruan)
+
+<!-- hide-in-app:end -->
 
 ---
 
@@ -59,6 +62,7 @@ Karyawan baru bisa menerima **link onboarding** (biasanya lewat QR) dari HR. Buk
 
 - **Sidebar kiri** — menu utama dikelompokkan: *Task*, *People & Organization*, *Competency*, *Training & Development*, *Safety*, *Insights & System*. Klik nama grup untuk membuka/menutup. Di ponsel sidebar tersembunyi dan dibuka dengan tombol menu.
 - **Kotak Search menu** — di atas sidebar, untuk mencari menu dengan cepat.
+- **Help** — menu di bagian bawah sidebar yang membuka panduan ini langsung di dalam aplikasi, lengkap dengan daftar isi. Bagian *Panduan Administrator* hanya tampil untuk Administrator.
 - **Tombol collapse** — di bawah sidebar, untuk menciutkan sidebar menjadi ikon saja.
 - **Top bar** — ikon **lonceng notifikasi** (dengan angka belum dibaca) dan menu pengguna (Profile, Logout).
 - **Lencana “🔒 View only”** — muncul di halaman daftar bila Anda hanya boleh melihat, tidak boleh mengedit menu itu.
@@ -303,6 +307,7 @@ Catatan perubahan yang tidak bisa dihapus: siapa membuat/mengubah/menghapus data
 
 ---
 
+<!-- admin-only:start -->
 ## 11. Panduan Administrator
 
 ### User Management
@@ -327,6 +332,8 @@ Akun login untuk karyawan dapat dibuat massal lewat perintah artisan `app:provis
 
 ### Tugas terjadwal
 Perintah harian yang berjalan otomatis: notifikasi kedaluwarsa sertifikat dan pengingat sesi training, ringkasan mingguan untuk supervisor, serta laporan gabungan lewat email.
+
+<!-- admin-only:end -->
 
 ---
 
@@ -364,4 +371,5 @@ Tambahkan satu baris setiap kali aplikasi berubah dan tutorial diperbarui. Yang 
 
 | Tanggal | Perubahan pada tutorial |
 |---|---|
+| 2026-10-22 | Menambahkan menu **Help** di sidebar yang menampilkan tutorial ini di dalam aplikasi (bagian 2); Help dapat disembunyikan per pengguna lewat Menu Visibility. |
 | 2026-10-22 | Versi awal tutorial: seluruh menu yang ada saat ini (Task, People & Organization, Competency, Training & Development, Safety, Insights & System, panduan Administrator). |

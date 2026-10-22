@@ -12,6 +12,7 @@ use App\Http\Controllers\EmployeeOnboardingController;
 use App\Http\Controllers\EmployeeSkillAssessmentController;
 use App\Http\Controllers\EmployeeSkillChecklistController;
 use App\Http\Controllers\GuestSessionController;
+use App\Http\Controllers\HelpController;
 use App\Http\Controllers\JobDescriptionController;
 use App\Http\Controllers\LototoController;
 use App\Http\Controllers\MasterDataController;
@@ -377,6 +378,8 @@ Route::middleware(['auth', 'verified'])
 Route::middleware(['auth', 'verified'])
     ->post('/news/{news}/acknowledge', [NewsController::class, 'acknowledge'])
     ->name('news.acknowledge');
+
+Route::middleware(['auth', 'verified'])->get('/help', [HelpController::class, 'index'])->name('help.index');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

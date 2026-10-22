@@ -34,6 +34,7 @@ enum SidebarMenu: string
     case Lototo = 'lototo';
     case Reports = 'reports';
     case News = 'news';
+    case Help = 'help';
 
     public function label(): string
     {
@@ -60,6 +61,7 @@ enum SidebarMenu: string
             self::Lototo => 'LOTOTO',
             self::Reports => 'Reports',
             self::News => 'News',
+            self::Help => 'Help',
         };
     }
 
@@ -72,7 +74,7 @@ enum SidebarMenu: string
             self::TrainingManagement, self::TrainingCalendar, self::TrainingRecords, self::Certificates,
             self::Recertification, self::Signatories, self::DevelopmentPlans => 'Training & Development',
             self::Lototo => 'Safety',
-            self::Reports, self::News => 'Insights & System',
+            self::Reports, self::News, self::Help => 'Insights & System',
         };
     }
 
@@ -110,6 +112,7 @@ enum SidebarMenu: string
             self::Lototo => ['safety.lototo.*'],
             self::Reports => ['reports.*'],
             self::News => ['news.*'],
+            self::Help => ['help.*'],
         };
     }
 

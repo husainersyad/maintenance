@@ -26,6 +26,7 @@ $roleManagementActive = request()->routeIs('admin.roles.*');
 $auditLogActive = request()->routeIs('audit-logs.*');
 $settingsActive = request()->routeIs('settings.*');
 $newsActive = request()->routeIs('news.*');
+$helpActive = request()->routeIs('help.*');
 $myTaskActive = request()->routeIs('tasks.*');
 $shiftCommActive = request()->routeIs('shift-comm.*');
 
@@ -71,6 +72,7 @@ $showDevelopmentPlans = $canViewDevelopmentPlans && $visible(\App\Enums\SidebarM
 $showLototo = $canViewSafety && $visible(\App\Enums\SidebarMenu::Lototo);
 $showReports = $canViewReports && $visible(\App\Enums\SidebarMenu::Reports);
 $showNews = $canManageNews && $visible(\App\Enums\SidebarMenu::News);
+$showHelp = $visible(\App\Enums\SidebarMenu::Help);
 
 // Section headings only render when at least one item beneath them would -
 // an empty "Insights & System" heading with nothing under it is just noise
@@ -295,6 +297,14 @@ $mobile = $mobile ?? false;
                     </x-nav-item>
                 @endif
             </x-nav-group>
+        @endif
+
+        @if ($showHelp)
+            <div class="space-y-1">
+                <x-nav-item :href="route('help.index')" :active="$helpActive" top icon="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z">
+                    Help
+                </x-nav-item>
+            </div>
         @endif
     </nav>
 
