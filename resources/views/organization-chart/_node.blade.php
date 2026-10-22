@@ -8,7 +8,14 @@ $children = $childrenByParent->get($employee->id, collect());
 // starts expanded so the reporting line up to the top is visible without
 // the user having to click through each collapsed supervisor.
 $isSupervisor = str_contains(strtolower((string) $employee->position?->title), 'supervisor');
-$stackChildren = $children->isNotEmpty() && $children->every(fn ($child) => $child->workforce_category === 'BC');
+$stackChildren = $children->isNotEmpty() && (
+    $children->every(fn ($child) => $child->workforce_category === 'BC')
+    // A few non-BC people (e.g. a specialist) mixed into a technician team
+    // shouldn't break the team into one long row: still stack, as long as
+    // none of them has a team of their own to draw underneath.
+    || ($children->contains(fn ($child) => $child->workforce_category === 'BC')
+        && $children->every(fn ($child) => $childrenByParent->get($child->id, collect())->isEmpty()))
+);
 $forceExpand ??= false;
 $teamTrades ??= collect();
 $highlightIds ??= collect();

@@ -242,4 +242,19 @@ class OrganizationChartTest extends TestCase
         $picked->assertSee('Contract Person');
         $picked->assertDontSee('Perm Person');
     }
+
+    public function test_a_technician_team_with_a_non_blue_collar_member_still_stacks_in_two_columns(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole(RoleName::Administrator->value);
+
+        $supervisor = Employee::factory()->create(['employment_status_id' => $this->active->id, 'workforce_category' => 'WCM', 'supervisor_id' => null]);
+        Employee::factory()->count(3)->create(['employment_status_id' => $this->active->id, 'workforce_category' => 'BC', 'supervisor_id' => $supervisor->id]);
+        Employee::factory()->create(['employment_status_id' => $this->active->id, 'workforce_category' => 'WCM', 'supervisor_id' => $supervisor->id]);
+
+        $response = $this->actingAs($admin)->get(route('organization-chart.index', ['applied' => 1]));
+
+        $response->assertOk();
+        $this->assertStringContainsString('org-chart-stack', $response->getContent());
+    }
 }
