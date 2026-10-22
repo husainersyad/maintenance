@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\PermissionName;
+use App\Enums\MenuKey;
+use App\Support\HelpGuide;
+use App\Support\MenuAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -12,21 +14,18 @@ use League\CommonMark\Normalizer\SlugNormalizer;
 class HelpController extends Controller
 {
     /**
-     * In-app user guide, rendered straight from docs/TUTORIAL.md so the
-     * file stays the single source of truth (see CLAUDE.md). Parts marked
-     * hide-in-app are developer-only; admin-only parts are only shown to
-     * users who can manage users.
+     * In-app user guide, rendered from docs/TUTORIAL.md (the single source
+     * of truth, see CLAUDE.md) and filtered to what the signed-in user can
+     * actually reach - see HelpGuide for the markers used in that file.
      */
     public function index(Request $request): View
     {
-        $markdown = file_get_contents(base_path('docs/TUTORIAL.md'));
+        $user = $request->user();
 
-        $markdown = preg_replace('/<!-- hide-in-app:start -->.*?<!-- hide-in-app:end -->/s', '', $markdown);
-
-        $isAdmin = $request->user()->can(PermissionName::ManageUsers->value);
-        $markdown = $isAdmin
-            ? preg_replace('/<!-- admin-only:(start|end) -->\n?/', '', $markdown)
-            : preg_replace('/<!-- admin-only:start -->.*?<!-- admin-only:end -->\n?/s', '', $markdown);
+        $markdown = HelpGuide::filter(
+            file_get_contents(base_path('docs/TUTORIAL.md')),
+            HelpGuide::keysFor($user),
+        );
 
         $slugger = new SlugNormalizer;
         $toc = [];
@@ -41,6 +40,22 @@ class HelpController extends Controller
             'heading_permalink' => ['id_prefix' => '', 'fragment_prefix' => '', 'symbol' => '#', 'html_class' => 'help-anchor'],
         ], [new HeadingPermalinkExtension]);
 
-        return view('help.index', ['html' => $html, 'toc' => $toc]);
+        $menus = collect(MenuAccess::visibleMenus($user))
+            ->reject(fn ($menu) => $menu->value === 'help')
+            ->groupBy(fn ($menu) => $menu->group())
+            ->map(fn ($group) => $group->map(fn ($menu) => $menu->label())->all());
+
+        $editable = collect(MenuKey::cases())
+            ->filter(fn (MenuKey $key) => $user->canEditMenu($key))
+            ->map(fn (MenuKey $key) => $key->label())
+            ->values();
+
+        return view('help.index', [
+            'html' => $html,
+            'toc' => $toc,
+            'roles' => $user->getRoleNames(),
+            'menus' => $menus,
+            'editable' => $editable,
+        ]);
     }
 }

@@ -7,62 +7,61 @@ Panduan ini untuk pengguna aplikasi internal Departemen Maintenance PT Bekaert I
 
 ## Daftar Isi
 
-1. [Memulai](#1-memulai)
-2. [Mengenal Tampilan](#2-mengenal-tampilan)
-3. [Role dan Hak Akses](#3-role-dan-hak-akses)
-4. [Dashboard](#4-dashboard)
-5. [Task](#5-task)
-6. [People & Organization](#6-people--organization)
-7. [Competency](#7-competency)
-8. [Training & Development](#8-training--development)
-9. [Safety](#9-safety)
-10. [Insights & System](#10-insights--system)
-11. [Panduan Administrator](#11-panduan-administrator)
-12. [Tanya Jawab & Masalah Umum](#12-tanya-jawab--masalah-umum)
-13. [Riwayat Pembaruan](#riwayat-pembaruan)
+Di dalam aplikasi, daftar isi dan isi panduan **otomatis disesuaikan dengan akses pengguna yang login** (aturan penanda ada di [CLAUDE.md](../CLAUDE.md)).
+
+- Memulai · Mengenal Tampilan · Role dan Hak Akses · Dashboard
+- Panduan Tamu (Guest)
+- Task · People & Organization · Competency · Training & Development · Safety · Insights & System
+- Panduan Administrator · Tanya Jawab & Masalah Umum · Riwayat Pembaruan
 
 <!-- hide-in-app:end -->
 
 ---
 
-## 1. Memulai
+## Memulai
 
 ### Login
 1. Buka alamat aplikasi, lalu isi **Email atau NIK** dan **Password**.
 2. Klik **Log in**.
 
 Pilihan lain di halaman login:
-- **Login with Face** — muncul hanya jika perangkat ini sudah didaftarkan untuk Face Login (lihat [Face Login](#face-login)).
+- **Login with Face** — muncul hanya jika perangkat ini sudah didaftarkan untuk Face Login (lihat *Face Login* di bawah).
 - **Continue browsing as guest** — masuk sebagai tamu, hanya bisa **melihat** data, tidak bisa mengubah apa pun.
 - **Forgot password** — minta tautan reset password lewat email.
 
+<!-- only:not-guest -->
 ### Login pertama: wajib ganti password
 Akun yang dibuat dengan password awal akan langsung diarahkan ke halaman **Profile**. Sebelum password diganti, hanya halaman Profile yang bisa dibuka. Isi password baru di bagian *Update Password*, lalu menu lain terbuka.
+<!-- /only -->
 
+<!-- only:not-guest -->
 ### Profile
 Buka dari menu pengguna di pojok kanan atas.
 - **Informasi profil** — nama dan email.
 - **Update Password** — ganti password.
 - **Face Login** — daftarkan wajah agar bisa login dan check-in training dengan kamera.
+<!-- /only -->
 
+<!-- only:not-guest -->
 ### Face Login
 1. Buka **Profile → Face Login** dari perangkat yang akan dipakai, izinkan akses kamera.
 2. Ikuti petunjuk untuk merekam wajah. Perangkat tersebut menjadi *trusted device*.
 3. Di halaman login perangkat itu akan muncul tombol **Login with Face**.
 4. Untuk berhenti memakainya, pilih opsi nonaktifkan di bagian yang sama.
 
-Face Login yang sama juga dipakai untuk **check-in kehadiran training** (lihat [bagian 8](#kehadiran-dengan-face-check-in)).
+Face Login yang sama juga dipakai untuk **check-in kehadiran training** (lihat *Kehadiran dengan Face Check-in* di bagian Training & Development, bila menu itu tersedia untuk Anda).
+<!-- /only -->
 
 ### Melengkapi profil lewat QR / link onboarding
 Karyawan baru bisa menerima **link onboarding** (biasanya lewat QR) dari HR. Buka link itu (tanpa login), lengkapi data profil, lalu kirim. Link punya masa berlaku; bila kedaluwarsa atau tidak ditemukan, minta HR membuat link baru dari profil karyawan.
 
 ---
 
-## 2. Mengenal Tampilan
+## Mengenal Tampilan
 
 - **Sidebar kiri** — menu utama dikelompokkan: *Task*, *People & Organization*, *Competency*, *Training & Development*, *Safety*, *Insights & System*. Klik nama grup untuk membuka/menutup. Di ponsel sidebar tersembunyi dan dibuka dengan tombol menu.
 - **Kotak Search menu** — di atas sidebar, untuk mencari menu dengan cepat.
-- **Help** — menu di bagian bawah sidebar yang membuka panduan ini langsung di dalam aplikasi, lengkap dengan daftar isi. Bagian *Panduan Administrator* hanya tampil untuk Administrator.
+- **Help** — menu di bagian bawah sidebar yang membuka panduan ini langsung di dalam aplikasi, lengkap dengan daftar isi. Isi panduan menyesuaikan akun yang login: hanya fitur yang bisa Anda akses yang ditampilkan.
 - **Tombol collapse** — di bawah sidebar, untuk menciutkan sidebar menjadi ikon saja.
 - **Top bar** — ikon **lonceng notifikasi** (dengan angka belum dibaca) dan menu pengguna (Profile, Logout).
 - **Lencana “🔒 View only”** — muncul di halaman daftar bila Anda hanya boleh melihat, tidak boleh mengedit menu itu.
@@ -78,11 +77,10 @@ Klik lonceng untuk melihat notifikasi, lalu klik salah satu untuk langsung menuj
 
 ---
 
-## 3. Role dan Hak Akses
+## Role dan Hak Akses
 
 | Role | Cakupan data karyawan | Garis besar kemampuan |
 |---|---|---|
-| 2026-10-22 | Shift Comm: banner WARNING mesin bermasalah berulang kini bisa di-expand/collapse (default tertutup). |
 | **Administrator** | Semua | Semua fitur, termasuk User Management, Roles, Settings, Audit Log |
 | **People Development** (HR) | Semua | Melihat seluruh karyawan; mengelola training, sertifikat, dll. sesuai izin |
 | **Maintenance Manager** | Diri sendiri + bawahan langsung | Mengelola job description, skill, training, development plan, safety, melihat laporan |
@@ -98,17 +96,30 @@ Administrator juga dapat **menyembunyikan menu tertentu** dari pengguna tertentu
 
 ---
 
-## 4. Dashboard
+## Dashboard
 
 Halaman pertama setelah login. Menampilkan:
 - **Kartu statistik** berisi angka nyata dari database (karyawan, organisasi, skill/kompetensi, training, sertifikat), beberapa dengan grafik kecil (misalnya karyawan Aktif vs Tidak Aktif, status gap kompetensi, distribusi status sertifikat).
 - **Klik kartu** untuk langsung membuka modul terkait. Kartu hanya bisa diklik jika Anda berhak membuka modul tersebut.
-- **News** — pengumuman dari Maintenance. Pengumuman yang mensyaratkan konfirmasi harus Anda **konfirmasi sudah dibaca** (lihat [News](#news)).
+- **News** — pengumuman dari Maintenance. Pengumuman yang mensyaratkan konfirmasi harus Anda **konfirmasi sudah dibaca** (lihat bagian News).
 
 ---
+<!-- only:guest -->
+## Panduan Tamu (Guest)
 
-## 5. Task
+Anda masuk sebagai **tamu**. Akun tamu dipakai bersama dan bersifat **hanya-lihat**:
+- Anda dapat melihat data di menu yang tersedia di sidebar, tetapi **tidak dapat menambah, mengubah, atau menghapus** apa pun — apa pun pengaturannya.
+- Halaman Profile, Face Login, Task, dan Shift Comm tidak tersedia untuk tamu.
+- Gunakan filter, pencarian, dan ekspor di halaman daftar untuk menelusuri data.
+- Untuk mendapat akun pribadi dengan hak lebih luas, hubungi Administrator atau HR.
 
+---
+<!-- /only -->
+
+<!-- only:tasks|shift-comm -->
+## Task
+
+<!-- only:tasks -->
 ### My Task
 Papan tugas gaya *planner* (plan → bucket → task).
 
@@ -123,7 +134,9 @@ Papan tugas gaya *planner* (plan → bucket → task).
 4. Pindahkan task antar bucket dengan *drag*, atau centang **complete** bila sudah selesai.
 
 Tugas yang ditugaskan kepada Anda muncul di bagian tugas Anda dan memicu notifikasi. Bila akun Anda belum terhubung ke data karyawan, tugas tidak bisa ditugaskan ke Anda; hubungi Administrator/HR.
+<!-- /only -->
 
+<!-- only:shift-comm -->
 ### Shift Comm
 Catatan komunikasi antar-shift (serah terima).
 1. Buka **Task → Shift Comm** → tambah entri baru.
@@ -131,30 +144,39 @@ Catatan komunikasi antar-shift (serah terima).
 3. Isi status dan catatan, lalu simpan.
 4. Entri dapat dibuka, diedit, atau dihapus sesuai hak Anda.
 5. Bila ada mesin dengan problem berulang, banner kuning **WARNING** muncul di atas halaman. Banner ini **tertutup secara default** (hanya menampilkan jumlah mesin); klik banner untuk membuka/menutup rincian per mesin.
+<!-- /only -->
 
 ---
+<!-- /only -->
+<!-- only:employees|organization-chart|qr-codes|plant-manager|organization|overtime -->
+## People & Organization
 
-## 6. People & Organization
-
+<!-- only:employees -->
 ### Employees (Database Karyawan)
 **Melihat dan mencari**
 - Daftar menampilkan Foto, NIK, Nama, Supervisor, Posisi, Skill Position, dan Shift.
 - Cari berdasarkan NIK atau nama.
 - Filter: Business Unit, Department, Employment Type, Employment Source, Employment Status (default **Active**), Supervisor, dan Shift. Beberapa filter bisa dipilih lebih dari satu nilai.
 
-**Menambah karyawan** (butuh hak edit)
+<!-- only:edit:employees -->
+**Menambah karyawan**
 1. Klik **Add Employee**, isi formulir, simpan.
 2. Anda juga bisa **impor** banyak karyawan sekaligus lewat fitur import.
 
 **Menghapus** — centang beberapa baris lalu **Delete Selected**. Setiap baris diperiksa haknya satu per satu.
+<!-- /only -->
 
 **Profil karyawan** (klik nama) memakai tab:
 - **Overview** — foto, Business Unit, Skill Position, Employment Source, klasifikasi Blue Collar / White Collar Management, dan data lain.
 - **Job Description**, **Skills**, **Training**, **Certificates**, **Development Plans** — ringkasan modul terkait untuk karyawan itu.
+<!-- only:edit:employees -->
 - Tombol untuk membuat ulang **link onboarding** karyawan.
+<!-- /only -->
 
 > “Manager” tidak diisi manual; ditentukan otomatis dari rantai supervisor.
+<!-- /only -->
 
+<!-- only:organization-chart -->
 ### Organization Chart
 Bagan organisasi berbasis foto dari hierarki supervisor.
 - Tiap kotak menampilkan foto/inisial, NIK, nama, dan Skill Position.
@@ -162,21 +184,29 @@ Bagan organisasi berbasis foto dari hierarki supervisor.
 - Filter berdasarkan Business Unit, Department, dan Employment Type; legenda menampilkan jumlah tenaga kerja.
 - Tim teknisi menampilkan jumlah per trade.
 - Cakupan yang terlihat mengikuti hierarki (HR/Admin melihat seluruh perusahaan).
+<!-- /only -->
 
+<!-- only:qr-codes -->
 ### QR Codes
 Menampilkan QR verifikasi sertifikat untuk tiap karyawan (cocok untuk badge).
 - **Download PNG** atau **Print This Page**.
 - QR membuka halaman publik verifikasi sertifikat karyawan tersebut (tanpa login).
 - **Base URL** yang dipakai di QR hanya bisa diubah Administrator.
+<!-- /only -->
 
+<!-- only:plant-manager -->
 ### Plant Manager
 Plant Manager (pemimpin tertinggi) **tidak muncul** di daftar Employees maupun total karyawan; datanya hanya dikelola di halaman ini. Isi data lalu **Save Changes**.
+<!-- /only -->
 
+<!-- only:organization -->
 ### Organization (Master Data)
 Hanya untuk pengguna dengan izin master data (default: Administrator). Dari landing page pilih jenis data: departemen, divisi, area maintenance, tim, posisi, business unit, skill position, employment type/source/status, shift, lokasi, kategori skill, level kompetensi, dan lain-lain.
 - **Create**, **Edit**, nonaktifkan, atau **Delete** data.
 - Tersedia **Import** dan **Export** per jenis data.
+<!-- /only -->
 
+<!-- only:overtime -->
 ### Overtime
 Pencatatan lembur oleh atasan untuk bawahan langsungnya.
 
@@ -193,11 +223,14 @@ Pencatatan lembur oleh atasan untuk bawahan langsungnya.
 **Pengelola Overtime**
 - Grafik *Overtime Trend* 6 bulan terakhir.
 - **Export Selected (.xlsx)** dan **Mark Selected as Submitted to HR**. Tanpa pilihan, tombol memproses semua entri yang belum diserahkan.
+<!-- /only -->
 
 ---
+<!-- /only -->
+<!-- only:job-descriptions|skills|skill-matrix|competency-gap -->
+## Competency
 
-## 7. Competency
-
+<!-- only:job-descriptions -->
 ### Job Descriptions
 Alur versi: **Draft → Pending Review → Active → Archived**.
 1. **Create** job description untuk sebuah posisi (default semua orang boleh membuat dan mengedit draft).
@@ -207,7 +240,9 @@ Alur versi: **Draft → Pending Review → Active → Archived**.
 5. **Archive** versi yang tidak dipakai lagi.
 
 Job description aktif tampil di tab *Job Description* pada profil karyawan.
+<!-- /only -->
 
+<!-- only:skills -->
 ### Skills & Competencies
 Halaman landing berisi:
 - **Skill Catalog** — daftar skill, bisa impor/ekspor (tersedia template).
@@ -216,20 +251,27 @@ Halaman landing berisi:
 - **Skill Checklist** karyawan — dari profil karyawan, centang skill yang dikuasai.
 
 **Skill assessment** dicatat dari profil karyawan (tab Skills): pilih skill dan level. Riwayat **tidak pernah ditimpa**; level saat ini adalah penilaian terbaru. Skill yang belum dinilai ditampilkan sebagai *not assessed* — tidak dianggap memenuhi syarat.
+<!-- /only -->
 
+<!-- only:skill-matrix -->
 ### Skill Matrix
 Matriks karyawan × skill yang membandingkan level saat ini dengan level yang disyaratkan.
 - **Gap = required − current.**
 - Filter berdasarkan area, tim, posisi, kategori skill.
 - Status per karyawan: *Meets*, *Development Required*, *Assessment Incomplete*, *No Requirements Defined*.
+<!-- /only -->
 
+<!-- only:competency-gap -->
 ### Competency Gap Analysis
 Rangkuman gap tingkat departemen: skill dengan gap terbesar, posisi dan area yang paling butuh pengembangan, daftar karyawan yang punya gap, serta **saran training** (hanya saran, bukan keputusan yang disetujui).
+<!-- /only -->
 
 ---
+<!-- /only -->
+<!-- only:training-management|training-calendar|training-records|certificates|recertification|signatories|development-plans -->
+## Training & Development
 
-## 8. Training & Development
-
+<!-- only:training-management -->
 ### Training Management
 **Program** — buat program training: kategori, tipe, penyedia, biaya, durasi, dan skill terkait.
 
@@ -240,43 +282,68 @@ Rangkuman gap tingkat departemen: skill dengan gap terbesar, posisi dan area yan
 **Kuis**
 - Pada program, kelola **bank soal** (tambah soal, impor/ekspor).
 - Peserta mengerjakan kuis, dan skor tercatat. Pengelola dapat melihat jawaban peserta dan **mereset** kuis seorang peserta.
+<!-- /only -->
 
+<!-- only:training-management -->
 ### Kehadiran dengan Face Check-in
 1. Buka halaman sesi → **Check-in**, lalu **Start Check-in** (biarkan terbuka di perangkat di lokasi training).
 2. Setiap peserta menghadap kamera bergantian; wajah yang cocok otomatis ditandai **hadir**.
 3. Peserta yang belum mendaftarkan Face Login atau tidak dikenali ditandai hadir **manual** dari halaman sesi.
+<!-- /only -->
 
+<!-- only:training-calendar|training-records -->
+### Mengerjakan Kuis Training
+Bila sesi training yang Anda ikuti punya kuis, Anda akan mengerjakannya sebagai peserta. Skor Anda tercatat; bila perlu diulang, pengelola training dapat mereset kuis Anda.
+<!-- /only -->
+
+<!-- only:training-calendar -->
 ### Training Calendar
 Melihat jadwal dalam dua tampilan: **list** dan **grid bulanan** (navigasi antar bulan).
+<!-- /only -->
 
+<!-- only:training-records -->
 ### Training Records
 Riwayat training per karyawan: program, tanggal, jam, kehadiran/status, skor/hasil, level kompetensi sebelum–sesudah, dan referensi sertifikat. Ada indeks global yang bisa dicari, impor, dan ekspor. Total jam training tampil di profil karyawan.
+<!-- /only -->
 
+<!-- only:certificates -->
 ### Certificates
 - **Menambah** — dari profil karyawan (tab Certificates) atau impor massal. Isi tipe, nomor, penerbit, tanggal terbit dan kedaluwarsa, lalu unggah file (**PDF/JPG/PNG, maks 5 MB**). File disimpan privat dan hanya bisa diunduh lewat aplikasi oleh pihak yang berhak.
 - **Status** dihitung otomatis dari tanggal kedaluwarsa: *Valid*, *Expiring Soon*, *Expired*, *No Expiry*, *Pending Verification*. Sertifikat yang sekadar diunggah tidak otomatis dianggap valid.
 - **Verifikasi publik** — halaman publik (tanpa login) untuk memverifikasi sertifikat lewat QR.
+<!-- /only -->
 
+<!-- only:recertification -->
 ### Recertification
 Daftar sertifikat yang perlu diperbarui. Pilih rentang waktu (termasuk *Already overdue* dan *All certificates with an expiry date*), lihat *Days Remaining*, buka sertifikat, dan **Export XLSX**.
+<!-- /only -->
 
+<!-- only:signatories -->
 ### Signatories
 Daftar penandatangan yang dipakai pada sertifikat. Tambah/ubah lewat formulir di menu ini.
+<!-- /only -->
 
+<!-- only:development-plans -->
 ### Development Plans
 Rencana pengembangan per karyawan: tujuan, gap kompetensi terkait, level saat ini vs target, jenis aksi (training formal, OJT, coaching, mentoring, job rotation, self-learning, practical assessment, cross-training, sertifikasi), mentor, rekomendasi program, prioritas, status, progres, dan catatan manajer/karyawan. Dibuat dari profil karyawan atau halaman indeks.
+<!-- /only -->
 
 ---
+<!-- /only -->
+<!-- only:lototo -->
+## Safety
 
-## 9. Safety
-
+<!-- only:lototo -->
 ### LOTOTO
 Menu untuk pencatatan *Lock Out Tag Out*. **Saat ini masih placeholder** (modul dalam pengembangan); belum ada fitur yang bisa dipakai.
+<!-- /only -->
 
 ---
+<!-- /only -->
+<!-- only:reports|news|settings|admin -->
+## Insights & System
 
-## 10. Insights & System
-
+<!-- only:reports -->
 ### Reports
 Pusat laporan. Sebagian laporan membuka modul yang sudah ada dengan filter dan opsi ekspor; yang lain berdiri sendiri:
 - **Training Hours** (per karyawan dan per departemen)
@@ -285,7 +352,9 @@ Pusat laporan. Sebagian laporan membuka modul yang sudah ada dengan filter dan o
 - **Combined export** (laporan gabungan modul)
 
 Ekspor tersedia dalam **CSV** dan **XLSX** untuk Employees, Certificates, Training Records, Training Hours, dan Assessment History.
+<!-- /only -->
 
+<!-- only:news -->
 ### News
 Pengumuman yang tampil di Dashboard (kelola oleh pengguna dengan izin News).
 1. **Create** berita: judul, isi, gambar (maks 10 MB, otomatis diperkecil).
@@ -296,19 +365,24 @@ Pengumuman yang tampil di Dashboard (kelola oleh pengguna dengan izin News).
 4. Opsional: **tanggal kedaluwarsa** — setelah itu berita otomatis disembunyikan dari Dashboard (tetap bisa diedit di daftar).
 
 Penerima membuka berita lalu menekan tombol konfirmasi.
+<!-- /only -->
 
+<!-- only:settings -->
 ### Settings *(Administrator)*
 Pengaturan aplikasi, saat ini:
 - Jendela waktu **“expiring soon”** sertifikat.
 - Jarak waktu **pengingat sesi training**.
+<!-- /only -->
 
+<!-- only:admin -->
 ### Audit Log *(Administrator)*
 Catatan perubahan yang tidak bisa dihapus: siapa membuat/mengubah/menghapus data, kapan, dan field apa yang berubah. Mencakup karyawan, sertifikat, penilaian skill, job description, training record, dan development plan.
+<!-- /only -->
 
 ---
-
-<!-- admin-only:start -->
-## 11. Panduan Administrator
+<!-- /only -->
+<!-- only:admin -->
+## Panduan Administrator
 
 ### User Management
 **Menambah pengguna**
@@ -333,35 +407,44 @@ Akun login untuk karyawan dapat dibuat massal lewat perintah artisan `app:provis
 ### Tugas terjadwal
 Perintah harian yang berjalan otomatis: notifikasi kedaluwarsa sertifikat dan pengingat sesi training, ringkasan mingguan untuk supervisor, serta laporan gabungan lewat email.
 
-<!-- admin-only:end -->
-
 ---
+<!-- /only -->
 
-## 12. Tanya Jawab & Masalah Umum
+## Tanya Jawab & Masalah Umum
 
 **Menu yang saya cari tidak ada.**
 Menu tersebut mungkin disembunyikan oleh Administrator atau role Anda tidak punya izin. Hubungi Administrator.
 
+<!-- only:not-guest -->
 **Tombol tambah/ubah/hapus tidak muncul, ada tulisan “View only”.**
 Anda belum punya hak edit untuk menu itu. Minta Administrator memberi hak edit lewat User Management.
+<!-- /only -->
 
 **Saya tidak melihat karyawan lain.**
 Data dibatasi hierarki: Anda hanya melihat diri sendiri dan bawahan langsung. Hanya HR dan Administrator yang melihat semua.
 
+<!-- only:not-guest -->
 **Saya hanya bisa membuka halaman Profile.**
 Anda belum mengganti password awal. Ganti dulu di *Update Password*.
+<!-- /only -->
 
+<!-- only:not-guest -->
 **Tombol Login with Face tidak muncul.**
 Perangkat ini belum didaftarkan. Login dengan password, lalu daftar di *Profile → Face Login*.
+<!-- /only -->
 
+<!-- only:tasks -->
 **Tugas tidak bisa ditugaskan ke saya.**
 Akun Anda belum terhubung ke data karyawan. Hubungi Administrator.
+<!-- /only -->
 
 **Link onboarding tidak ditemukan / kedaluwarsa.**
 Minta HR membuat link baru dari profil karyawan.
 
+<!-- only:certificates -->
 **Sertifikat saya berstatus Pending Verification.**
 File sudah diunggah tetapi belum diverifikasi. Sertifikat tidak dianggap valid sebelum itu.
+<!-- /only -->
 
 ---
 
@@ -371,5 +454,7 @@ Tambahkan satu baris setiap kali aplikasi berubah dan tutorial diperbarui. Yang 
 
 | Tanggal | Perubahan pada tutorial |
 |---|---|
+| 2026-10-22 | Shift Comm: banner WARNING mesin bermasalah berulang kini bisa di-expand/collapse (default tertutup). |
+| 2026-10-22 | Help kini menyesuaikan isi dengan akun yang login (role, menu yang tersedia/disembunyikan, hak edit): tamu hanya melihat panduan tamu, Administrator melihat panduan Administrator, dan seterusnya. Bagian bernomor dihapus dari judul; ditambah bagian *Panduan Tamu* dan *Mengerjakan Kuis Training*. |
 | 2026-10-22 | Menambahkan menu **Help** di sidebar yang menampilkan tutorial ini di dalam aplikasi (bagian 2); Help dapat disembunyikan per pengguna lewat Menu Visibility. |
 | 2026-10-22 | Versi awal tutorial: seluruh menu yang ada saat ini (Task, People & Organization, Competency, Training & Development, Safety, Insights & System, panduan Administrator). |

@@ -1,6 +1,26 @@
 <x-app-layout>
     <x-slot name="header">Help</x-slot>
 
+    <section class="mb-6 rounded-lg border border-brand-200 bg-brand-50 p-4 text-sm text-neutral-800 shadow-sm">
+        <p>
+            Panduan ini disesuaikan untuk akun Anda — role:
+            <strong>{{ $roles->implode(', ') ?: 'tanpa role' }}</strong>.
+            Hanya fitur yang bisa Anda akses yang ditampilkan.
+        </p>
+        <p class="mt-2">
+            <span class="font-medium">Menu yang tersedia:</span>
+            @forelse ($menus as $group => $labels)
+                <span class="whitespace-nowrap"><span class="text-neutral-500">{{ $group }}:</span> {{ implode(', ', $labels) }}{{ $loop->last ? '' : ' ·' }}</span>
+            @empty
+                Dashboard saja.
+            @endforelse
+        </p>
+        <p class="mt-2">
+            <span class="font-medium">Hak edit:</span>
+            {{ $editable->isEmpty() ? 'Hanya melihat (read-only).' : $editable->implode(', ') }}
+        </p>
+    </section>
+
     <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
         <nav aria-label="Help contents" class="shrink-0 rounded-lg border border-neutral-200 bg-white p-4 shadow-md lg:sticky lg:top-4 lg:w-64">
             <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">Daftar Isi</p>
