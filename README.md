@@ -4,6 +4,8 @@ An internal web application for the Maintenance Department of **PT Bekaert Indon
 
 > This project is under active development. It is not officially connected to, or endorsed by, any PT Bekaert Indonesia production system. The logo placeholder in the sidebar and login page is a stand-in for the official company logo, which can be added later.
 
+> **User guide:** see [docs/TUTORIAL.md](docs/TUTORIAL.md) (Bahasa Indonesia). It must be updated with every user-visible change - see [CLAUDE.md](CLAUDE.md).
+
 ## Current status: feature-complete, including all Roadmap follow-ons
 
 All 7 phases from the project brief have been built, plus the Settings, notifications, `.xlsx` export, and visual calendar follow-ons identified afterwards. See [Known limitations](#known-limitations) for what's intentionally out of scope.
