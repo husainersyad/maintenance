@@ -19,10 +19,12 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    /** SQL expression for a 2-digit month number (MySQL). */
+    /** SQL expression for a 2-digit month number (MySQL/SQLite compatible). */
     private function monthExpr(string $column): string
     {
-        return "DATE_FORMAT({$column}, '%m')";
+        return \Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite'
+            ? "strftime('%m', {$column})"
+            : "DATE_FORMAT({$column}, '%m')";
     }
 
     /**
