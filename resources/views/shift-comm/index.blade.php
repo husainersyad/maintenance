@@ -78,7 +78,8 @@
                         <th class="px-4 py-2">Date</th>
                         <th class="px-4 py-2">Shift</th>
                         <th class="px-4 py-2">Team</th>
-                        <th class="px-4 py-2">Machine</th>
+                        <th class="px-4 py-2">Machine No.</th>
+                        <th class="px-4 py-2">Machine Type</th>
                         <th class="px-4 py-2">Problem</th>
                         <th class="px-4 py-2">Construction</th>
                         <th class="px-4 py-2">Torsion Shaft</th>
@@ -92,14 +93,15 @@
                             <td class="whitespace-nowrap px-4 py-2">{{ $comm->comm_date->format('d M Y') }}</td>
                             <td class="whitespace-nowrap px-4 py-2">{{ $comm->shiftName() }}</td>
                             <td class="px-4 py-2">{{ $comm->team }}</td>
-                            <td class="px-4 py-2">{{ $comm->machine_no }}</td>
+                            <td class="px-4 py-2 font-medium">{{ $comm->machine_no }}</td>
+                            <td class="px-4 py-2 text-neutral-600">{{ $comm->machine_type ?: '-' }}</td>
                             <td class="max-w-xs truncate px-4 py-2 text-neutral-600">{{ $comm->problem }}</td>
                             <td class="px-4 py-2">{{ $comm->construction }}</td>
                             <td class="whitespace-nowrap px-4 py-2">{{ $comm->is_torsion_shaft ? 'YA - '.$comm->torsionRelayLabel() : ($comm->is_torsion_shaft === null ? '' : 'TIDAK') }}</td>
                             <td class="px-4 py-2 text-right">{{ $comm->length_m !== null ? number_format($comm->length_m) : '' }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="9" class="px-4 py-6 text-center text-neutral-500">No Shift Comm entries found.</td></tr>
+                        <tr><td colspan="10" class="px-4 py-6 text-center text-neutral-500">No Shift Comm entries found.</td></tr>
                     @endforelse
                 </tbody>
             </table>

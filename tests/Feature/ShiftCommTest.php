@@ -193,4 +193,64 @@ class ShiftCommTest extends TestCase
         $guest->assignRole(RoleName::Guest->value);
         $this->actingAs($guest)->get(route('shift-comm.index'))->assertForbidden();
     }
+
+    public function test_machine_type_auto_fill_and_persistence(): void
+    {
+        $this->seed(\Database\Seeders\MachineSeeder::class);
+
+        $user = $this->staff();
+
+        // 1. Direct submit with machine_type
+        $this->actingAs($user)->post(route('shift-comm.store'), $this->payload([
+            'machine_no' => 'GL-01',
+            'machine_type' => 'Galvanizing Line',
+        ]))->assertRedirect();
+
+        $comm1 = ShiftComm::where('machine_no', 'GL-01')->firstOrFail();
+        $this->assertSame('Galvanizing Line', $comm1->machine_type);
+
+        // 2. Fallback auto-detection from catalog or prefix
+        $this->actingAs($user)->post(route('shift-comm.store'), $this->payload([
+            'machine_no' => 'DR-12',
+            'machine_type' => null,
+        ]))->assertRedirect();
+
+        $comm2 = ShiftComm::where('machine_no', 'DR-12')->firstOrFail();
+        $this->assertSame('Drawing Machine', $comm2->machine_type);
+
+        // 3. Verification on index and show pages
+        $this->actingAs($user)->get(route('shift-comm.show', $comm1))
+            ->assertOk()
+            ->assertSee('Galvanizing Line')
+            ->assertSee('Machine Type');
+
+        $this->actingAs($user)->get(route('shift-comm.index'))
+            ->assertOk()
+            ->assertSee('Galvanizing Line')
+            ->assertSee('Drawing Machine');
+
+        // 4. Test database seeded machine lookup
+        $this->assertSame('BF OLD', ShiftComm::lookupMachineType('1001'));
+        $this->assertSame('BF2003', ShiftComm::lookupMachineType('1032'));
+        $this->assertSame('HKM2009', ShiftComm::lookupMachineType('5000'));
+        $this->assertSame('HENXIN2009', ShiftComm::lookupMachineType('1329'));
+
+        // 5. Test fallback prefix detection
+        $this->assertSame('Drawing Machine', ShiftComm::lookupMachineType('DR-05'));
+        $this->assertSame('Drawing Machine', ShiftComm::lookupMachineType('drw-99'));
+        $this->assertSame('Galvanizing Line', ShiftComm::lookupMachineType('gl-02'));
+        $this->assertSame('Stranding Machine', ShiftComm::lookupMachineType('ST-01'));
+        $this->assertSame('Tubular Strander', ShiftComm::lookupMachineType('TB-02'));
+        $this->assertNull(ShiftComm::lookupMachineType('UNKNOWN-99'));
+        $this->assertNull(ShiftComm::lookupMachineType(''));
+        $this->assertNull(ShiftComm::lookupMachineType(null));
+
+        // 6. Test async lookup JSON endpoint
+        $this->actingAs($user)->getJson(route('shift-comm.machine-lookup', ['no' => '1001']))
+            ->assertOk()
+            ->assertJson([
+                'machine_no' => '1001',
+                'machine_type' => 'BF OLD',
+            ]);
+    }
 }

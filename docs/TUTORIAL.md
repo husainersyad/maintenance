@@ -141,9 +141,10 @@ Tugas yang ditugaskan kepada Anda muncul di bagian tugas Anda dan memicu notifik
 Catatan komunikasi antar-shift (serah terima).
 1. Buka **Task → Shift Comm** → tambah entri baru.
 2. Pilih **tim**, **tanggal**, dan **shift**. Tanggal dan shift menjadi bagian dari ID entri sehingga **tidak bisa diubah** setelah dibuat.
-3. Isi status dan catatan, lalu simpan.
-4. Entri dapat dibuka, diedit, atau dihapus sesuai hak Anda.
-5. Bila ada mesin dengan problem berulang, banner kuning **WARNING** muncul di atas halaman. Banner ini **tertutup secara default** (hanya menampilkan jumlah mesin); klik banner untuk membuka/menutup rincian per mesin.
+3. Masukkan **Machine No.**; kolom **Machine Type** di sampingnya akan terisi otomatis secara read-only berdasarkan nomor/tipe mesin (dapat memilih saran mesin yang tersedia).
+4. Isi status dan catatan, lalu simpan.
+5. Entri dapat dibuka, diedit, atau dihapus sesuai hak Anda.
+6. Bila ada mesin dengan problem berulang, banner kuning **WARNING** muncul di atas halaman. Banner ini **tertutup secara default** (hanya menampilkan jumlah mesin); klik banner untuk membuka/menutup rincian per mesin.
 <!-- /only -->
 
 ---
@@ -454,6 +455,7 @@ Tambahkan satu baris setiap kali aplikasi berubah dan tutorial diperbarui. Yang 
 
 | Tanggal | Perubahan pada tutorial |
 |---|---|
+| 2026-11-06 | Shift Comm: menambahkan field Machine Type di samping Machine No. dengan auto-fill otomatis read-only berdasarkan nomor/tipe mesin. |
 | 2026-11-05 | Logo aplikasi (sidebar, halaman login, laporan PDF) dan favicon diganti dengan logo perisai + topi toga. Tidak ada perubahan alur kerja. |
 | 2026-10-22 | Shift Comm: banner WARNING mesin bermasalah berulang kini bisa di-expand/collapse (default tertutup). |
 | 2026-10-22 | Help kini menyesuaikan isi dengan akun yang login (role, menu yang tersedia/disembunyikan, hak edit): tamu hanya melihat panduan tamu, Administrator melihat panduan Administrator, dan seterusnya. Bagian bernomor dihapus dari judul; ditambah bagian *Panduan Tamu* dan *Mengerjakan Kuis Training*. |

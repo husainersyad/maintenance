@@ -33,7 +33,8 @@ $fields = [
                 <div><dt class="text-[11px] font-medium uppercase text-neutral-500">Shift</dt><dd class="mt-0.5">{{ $comm->shiftName() }}</dd></div>
                 <div><dt class="text-[11px] font-medium uppercase text-neutral-500">Team</dt><dd class="mt-0.5">{{ $comm->team }}</dd></div>
                 <div><dt class="text-[11px] font-medium uppercase text-neutral-500">Machine No.</dt><dd class="mt-0.5">{{ $comm->machine_no }}</dd></div>
-                <div class="sm:col-span-2"><dt class="text-[11px] font-medium uppercase text-neutral-500">Construction</dt><dd class="mt-0.5">{{ $comm->construction ?: '-' }}</dd></div>
+                <div><dt class="text-[11px] font-medium uppercase text-neutral-500">Machine Type</dt><dd class="mt-0.5">{{ $comm->machine_type ?: '-' }}</dd></div>
+                <div><dt class="text-[11px] font-medium uppercase text-neutral-500">Construction</dt><dd class="mt-0.5">{{ $comm->construction ?: '-' }}</dd></div>
                 <div><dt class="text-[11px] font-medium uppercase text-neutral-500">Length</dt><dd class="mt-0.5">{{ $comm->length_m !== null ? number_format($comm->length_m).' m' : '-' }}</dd></div>
                 <div><dt class="text-[11px] font-medium uppercase text-neutral-500">Logged by</dt><dd class="mt-0.5">{{ $comm->creator?->name ?? '-' }}</dd></div>
             </dl>

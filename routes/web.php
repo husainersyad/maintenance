@@ -270,6 +270,7 @@ Route::middleware(['auth', 'verified'])->prefix('tasks')->name('tasks.')->group(
 Route::middleware(['auth', 'verified'])->prefix('shift-comm')->name('shift-comm.')->group(function () {
     Route::get('/', [ShiftCommController::class, 'index'])->name('index');
     Route::get('/create', [ShiftCommController::class, 'create'])->name('create');
+    Route::get('/machine-lookup', [ShiftCommController::class, 'lookupMachine'])->name('machine-lookup');
     Route::post('/', [ShiftCommController::class, 'store'])->name('store');
     Route::get('/{shiftComm}', [ShiftCommController::class, 'show'])->name('show');
     Route::get('/{shiftComm}/edit', [ShiftCommController::class, 'edit'])->name('edit');

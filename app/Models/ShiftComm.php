@@ -9,7 +9,7 @@ use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
-#[Fillable(['comm_date', 'shift', 'team', 'machine_no', 'problem', 'is_torsion_shaft', 'progress', 'torsion_relay_status', 'construction', 'length_m', 'remark', 'created_by'])]
+#[Fillable(['comm_date', 'shift', 'team', 'machine_no', 'machine_type', 'problem', 'is_torsion_shaft', 'progress', 'torsion_relay_status', 'construction', 'length_m', 'remark', 'created_by'])]
 class ShiftComm extends Model
 {
     /** Shift digit used inside the ID => label. The plant runs 3 shifts a day (defaulted by input time, see defaultShiftFor). */
@@ -25,6 +25,99 @@ class ShiftComm extends Model
     ];
 
     public const TEAMS = ['A', 'B', 'C', 'D', 'NS'];
+
+    /** Predefined machine catalog: machine_no => machine_type */
+    public const MACHINE_CATALOG = [
+        'DR-01' => 'Drawing Machine',
+        'DR-02' => 'Drawing Machine',
+        'DR-03' => 'Drawing Machine',
+        'DR-04' => 'Drawing Machine',
+        'DR-05' => 'Drawing Machine',
+        'DR-06' => 'Drawing Machine',
+        'DR-07' => 'Drawing Machine',
+        'DR-08' => 'Drawing Machine',
+        'DR-09' => 'Drawing Machine',
+        'DR-10' => 'Drawing Machine',
+        'DR-11' => 'Drawing Machine',
+        'DR-12' => 'Drawing Machine',
+        'GL-01' => 'Galvanizing Line',
+        'GL-02' => 'Galvanizing Line',
+        'GL-03' => 'Galvanizing Line',
+        'GL-04' => 'Galvanizing Line',
+        'GL-05' => 'Galvanizing Line',
+        'ST-01' => 'Stranding Machine',
+        'ST-02' => 'Stranding Machine',
+        'ST-03' => 'Stranding Machine',
+        'ST-04' => 'Stranding Machine',
+        'ST-05' => 'Stranding Machine',
+        'TB-01' => 'Tubular Strander',
+        'TB-02' => 'Tubular Strander',
+        'TB-03' => 'Tubular Strander',
+        'BC-01' => 'Bunching Machine',
+        'BC-02' => 'Bunching Machine',
+        'BC-03' => 'Bunching Machine',
+        'UT-01' => 'Utility & Compressor',
+        'UT-02' => 'Utility & Compressor',
+        'WS-01' => 'Workshop Equipment',
+        'WS-02' => 'Workshop Equipment',
+    ];
+
+    /** Prefix rules for automatic machine type detection */
+    public const MACHINE_PREFIX_RULES = [
+        'DR-' => 'Drawing Machine',
+        'DRW-' => 'Drawing Machine',
+        'DR' => 'Drawing Machine',
+        'GL-' => 'Galvanizing Line',
+        'GLV-' => 'Galvanizing Line',
+        'GL' => 'Galvanizing Line',
+        'ST-' => 'Stranding Machine',
+        'STR-' => 'Stranding Machine',
+        'ST' => 'Stranding Machine',
+        'TB-' => 'Tubular Strander',
+        'TUB-' => 'Tubular Strander',
+        'TB' => 'Tubular Strander',
+        'BC-' => 'Bunching Machine',
+        'BNC-' => 'Bunching Machine',
+        'BC' => 'Bunching Machine',
+        'UT-' => 'Utility & Compressor',
+        'UTL-' => 'Utility & Compressor',
+        'UT' => 'Utility & Compressor',
+        'WS-' => 'Workshop Equipment',
+        'WKS-' => 'Workshop Equipment',
+        'WS' => 'Workshop Equipment',
+    ];
+
+    /** Lookup machine type by machine number, or null if unknown / empty */
+    public static function lookupMachineType(?string $machineNo): ?string
+    {
+        if (! $machineNo) {
+            return null;
+        }
+
+        $upper = strtoupper(trim($machineNo));
+
+        // 1. Check database machines table first
+        try {
+            $dbType = Machine::where('machine_no', $upper)->value('machine_type');
+            if ($dbType) {
+                return $dbType;
+            }
+        } catch (\Throwable) {
+            // fallback if table does not exist yet (e.g. during some migrations)
+        }
+
+        if (isset(self::MACHINE_CATALOG[$upper])) {
+            return self::MACHINE_CATALOG[$upper];
+        }
+
+        foreach (self::MACHINE_PREFIX_RULES as $prefix => $type) {
+            if (str_starts_with($upper, $prefix)) {
+                return $type;
+            }
+        }
+
+        return null;
+    }
 
 
     protected function casts(): array
